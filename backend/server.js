@@ -1,4 +1,5 @@
 require('dotenv').config();
+require('events').EventEmitter.defaultMaxListeners = 20;
 const express = require('express');
 const cors = require('cors');
 const mongoose = require('mongoose');

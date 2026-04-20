@@ -27,6 +27,14 @@ const RESOURCES = [
         tagColor: '#0F6E56',
         tagBg: '#E1F5EE',
       },
+      {
+        title: 'Tech Interview Handbook — Offer Comparison Tool',
+        description: 'Compare internship and job offers side by side. See what others are getting paid to benchmark your own offer.',
+        url: 'https://app.techinterviewhandbook.org/offers?companyId=&companyName=&jobTitleId=&sortDirection=&sortType=&yoeCategory=',
+        tag: 'Offers',
+        tagColor: '#533AB7',
+        tagBg: '#EEEDFE',
+      },
     ],
   },
   {

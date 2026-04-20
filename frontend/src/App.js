@@ -4,6 +4,7 @@ import Jobs from './pages/Jobs';
 import SkillGap from './pages/SkillGap';
 import Deadlines from './pages/Deadlines';
 import Insights from './pages/Insights';
+import Resources from './pages/Resources';
 import './App.css';
 
 const TABS = [
@@ -12,6 +13,7 @@ const TABS = [
   { id: 'gap', label: 'Skill gap' },
   { id: 'deadlines', label: 'Deadlines' },
   { id: 'insights', label: 'Peer insights' },
+  { id: 'resources', label: 'Resources' },
 ];
 
 export default function App() {
@@ -46,6 +48,7 @@ export default function App() {
         {tab === 'gap' && <SkillGap />}
         {tab === 'deadlines' && <Deadlines />}
         {tab === 'insights' && <Insights />}
+        {tab === 'resources' && <Resources />}
       </main>
 
       <footer className="footer">

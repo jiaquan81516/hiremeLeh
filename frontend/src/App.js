@@ -5,6 +5,8 @@ import SkillGap from './pages/SkillGap';
 import Deadlines from './pages/Deadlines';
 import Insights from './pages/Insights';
 import Resources from './pages/Resources';
+import { CourseProvider, useCourse } from './CourseContext';
+import { COURSES } from './courseConfig';
 import './App.css';
 
 const TABS = [
@@ -16,7 +18,31 @@ const TABS = [
   { id: 'resources', label: 'Resources' },
 ];
 
-export default function App() {
+function CourseSelector() {
+  const { course, setCourse } = useCourse();
+  return (
+    <select
+      value={course}
+      onChange={e => setCourse(e.target.value)}
+      style={{
+        padding: '5px 10px',
+        borderRadius: 999,
+        border: '1px solid #e8e8e4',
+        fontSize: 12,
+        fontWeight: 500,
+        background: '#f5f5f3',
+        color: '#1a1a1a',
+        cursor: 'pointer',
+      }}
+    >
+      {Object.entries(COURSES).map(([key, val]) => (
+        <option key={key} value={key}>{val.label}</option>
+      ))}
+    </select>
+  );
+}
+
+function AppInner() {
   const [tab, setTab] = useState('trends');
 
   return (
@@ -24,7 +50,10 @@ export default function App() {
       <header className="header">
         <div className="header-inner">
           <div className="logo">HiremeLeh<span className="logo-accent">!</span></div>
-          <div className="live-badge">Live · MyCareersFuture</div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+            <CourseSelector />
+            <div className="live-badge">Live · MyCareersFuture</div>
+          </div>
         </div>
       </header>
 
@@ -55,5 +84,13 @@ export default function App() {
         Built by Foo Jia Quan · Data from MyCareersFuture (Singapore)
       </footer>
     </div>
+  );
+}
+
+export default function App() {
+  return (
+    <CourseProvider>
+      <AppInner />
+    </CourseProvider>
   );
 }

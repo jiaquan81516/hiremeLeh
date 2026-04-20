@@ -1,19 +1,24 @@
 import { useEffect, useState } from 'react';
 import { fetchTrends } from '../api';
+import { useCourse } from '../CourseContext';
+import { COURSES } from '../courseConfig';
 
 export default function Trends() {
+  const { course } = useCourse();
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
   useEffect(() => {
-    fetchTrends()
+    setLoading(true);
+    setError(null);
+    fetchTrends(course)
       .then(setData)
       .catch(e => setError(e.message))
       .finally(() => setLoading(false));
-  }, []);
+  }, [course]);
 
-  if (loading) return <div className="loading">Loading trends...</div>;
+  if (loading) return <div className="loading">Loading trends for {COURSES[course]?.label}...</div>;
   if (error) return <div className="error">Could not load trends: {error}</div>;
   if (!data) return null;
 
@@ -22,20 +27,25 @@ export default function Trends() {
 
   return (
     <div>
+      <div style={{ marginBottom: '1rem', display: 'flex', alignItems: 'center', gap: 8 }}>
+        <span style={{ fontSize: 13, color: '#888' }}>Showing data for</span>
+        <span style={{ fontSize: 13, fontWeight: 600, color: '#1a1a1a' }}>{COURSES[course]?.label}</span>
+      </div>
+
       <div className="metric-grid">
         <div className="metric">
           <div className="metric-label">Live postings</div>
           <div className="metric-value">{data.totalJobs?.toLocaleString()}</div>
-          <div className="metric-sub">tech roles in SG</div>
+          <div className="metric-sub">roles in SG</div>
         </div>
         <div className="metric">
           <div className="metric-label">Avg entry salary</div>
-          <div className="metric-value">${data.avgSalary?.toLocaleString()}</div>
+          <div className="metric-value">${data.avgSalary?.toLocaleString() || '—'}</div>
           <div className="metric-sub">per month</div>
         </div>
         <div className="metric">
           <div className="metric-label">Hottest skill</div>
-          <div className="metric-value">{data.topSkills?.[0]?.skill || '—'}</div>
+          <div className="metric-value" style={{ fontSize: 16 }}>{data.topSkills?.[0]?.skill || '—'}</div>
           <div className="metric-sub">most in-demand</div>
         </div>
         <div className="metric">
@@ -48,6 +58,7 @@ export default function Trends() {
       <div className="two-col">
         <div className="card">
           <h3>Most in-demand skills</h3>
+          {data.topSkills?.length === 0 && <div className="empty">No skill data yet for this track.</div>}
           {data.topSkills?.map(({ skill, count, pct }) => (
             <div className="skill-bar-row" key={skill}>
               <span className="skill-name">{skill}</span>
@@ -64,6 +75,7 @@ export default function Trends() {
 
         <div className="card">
           <h3>Top hiring companies</h3>
+          {data.topCompanies?.length === 0 && <div className="empty">No company data yet for this track.</div>}
           {data.topCompanies?.map(({ company, count }) => (
             <div className="skill-bar-row" key={company}>
               <span className="skill-name">{company}</span>

@@ -3,27 +3,53 @@ const Job = require('../models/Job');
 
 const MCF_BASE = 'https://api.mycareersfuture.gov.sg/v2';
 
-const TECH_KEYWORDS = [
-  'software', 'developer', 'engineer', 'data', 'analyst',
-  'backend', 'frontend', 'fullstack', 'full-stack', 'devops',
-  'cloud', 'it ', 'tech', 'intern', 'python', 'javascript'
+const ALL_QUERIES = [
+  // IS / Tech
+  'software engineer intern', 'data analyst intern', 'it intern',
+  'backend developer', 'full stack developer', 'systems analyst',
+  // CS
+  'software developer', 'devops intern', 'cloud engineer intern',
+  'machine learning intern', 'frontend developer',
+  // Business
+  'business analyst intern', 'consultant intern', 'marketing intern',
+  'business development intern', 'operations intern', 'management trainee',
+  'corporate banking intern', 'investment banking intern',
+  // Economics
+  'research analyst intern', 'policy analyst intern', 'economist intern',
+  'quantitative analyst intern', 'market research intern',
+  // Accountancy
+  'audit intern', 'tax intern', 'assurance intern', 'accounting intern',
+  'finance intern', 'internal audit intern',
 ];
 
 const SKILL_KEYWORDS = [
   'python', 'javascript', 'sql', 'node', 'react', 'mongodb',
   'express', 'tableau', 'firebase', 'git', 'html', 'css',
   'java', 'c++', 'typescript', 'aws', 'docker', 'kubernetes',
-  'machine learning', 'data analysis', 'excel', 'power bi'
+  'machine learning', 'data analysis', 'excel', 'power bi',
+  'r', 'stata', 'sap', 'myob', 'powerpoint', 'financial modelling',
+  'econometrics', 'salesforce', 'crm', 'ifrs', 'audit', 'tax',
 ];
+
+const COURSE_KEYWORDS = {
+  is: ['software', 'data', 'it ', 'tech', 'system', 'python', 'javascript', 'database', 'developer', 'analyst', 'product'],
+  cs: ['software engineer', 'backend', 'frontend', 'devops', 'cloud', 'machine learning', 'platform', 'swe'],
+  business: ['business', 'consultant', 'marketing', 'operations', 'commercial', 'strategy', 'management', 'corporate', 'investment banking'],
+  economics: ['research', 'policy', 'economist', 'quantitative', 'market research', 'economic', 'mas intern', 'mof'],
+  accountancy: ['audit', 'tax', 'assurance', 'accounting', 'finance intern', 'big 4', 'pwc', 'deloitte', 'ey', 'kpmg', 'financial report'],
+};
 
 function extractSkills(text) {
   const lower = text.toLowerCase();
   return SKILL_KEYWORDS.filter(skill => lower.includes(skill));
 }
 
-function isTechJob(title, description) {
+function detectCourse(title, description) {
   const text = (title + ' ' + description).toLowerCase();
-  return TECH_KEYWORDS.some(kw => text.includes(kw));
+  for (const [course, keywords] of Object.entries(COURSE_KEYWORDS)) {
+    if (keywords.some(kw => text.includes(kw))) return course;
+  }
+  return 'general';
 }
 
 function formatSalary(min, max) {
@@ -35,27 +61,26 @@ function formatSalary(min, max) {
 
 async function syncJobs() {
   try {
-    const queries = ['software engineer', 'data analyst intern', 'it intern', 'backend developer', 'full stack developer'];
     let allJobs = [];
-
-    for (const q of queries) {
-      const res = await axios.get(`${MCF_BASE}/jobs`, {
-        params: { search: q, limit: 20, page: 0 },
-        headers: { 'User-Agent': 'HiremeLeh/1.0' },
-        timeout: 10000,
-      });
-
-      const results = res.data?.results || [];
-      allJobs = allJobs.concat(results);
+    for (const q of ALL_QUERIES) {
+      try {
+        const res = await axios.get(`${MCF_BASE}/jobs`, {
+          params: { search: q, limit: 20, page: 0 },
+          headers: { 'User-Agent': 'HiremeLeh/1.0' },
+          timeout: 10000,
+        });
+        allJobs = allJobs.concat(res.data?.results || []);
+      } catch (e) {
+        console.error(`Query failed: ${q} — ${e.message}`);
+      }
     }
 
     let saved = 0;
     for (const job of allJobs) {
       const title = job.title || '';
       const desc = job.description || '';
-      if (!isTechJob(title, desc)) continue;
-
       const skills = extractSkills(title + ' ' + desc);
+      const course = detectCourse(title, desc);
       const minSalary = job.salary?.minimum;
       const maxSalary = job.salary?.maximum;
 
@@ -67,7 +92,8 @@ async function syncJobs() {
           company: job.postedCompany?.name || 'Unknown',
           salary: { min: minSalary, max: maxSalary, display: formatSalary(minSalary, maxSalary) },
           skills,
-          sector: job.ssocDetailList?.[0]?.ssocTitle || 'Tech',
+          course,
+          sector: job.ssocDetailList?.[0]?.ssocTitle || 'General',
           url: `https://www.mycareersfuture.gov.sg/job/${job.uuid}`,
           postedAt: job.metadata?.createdAt ? new Date(job.metadata.createdAt) : new Date(),
           closingAt: job.metadata?.expiryDate ? new Date(job.metadata.expiryDate) : null,
@@ -77,8 +103,7 @@ async function syncJobs() {
       );
       saved++;
     }
-
-    console.log(`Synced ${saved} tech jobs from MyCareersFuture`);
+    console.log(`Synced ${saved} jobs across all course tracks`);
   } catch (err) {
     console.error('Job sync failed:', err.message);
   }
@@ -86,7 +111,7 @@ async function syncJobs() {
 
 async function getJobs(req, res) {
   try {
-    const { search, sector, internship, page = 0, limit = 20 } = req.query;
+    const { search, course, internship, page = 0, limit = 20 } = req.query;
     const query = {};
 
     if (search) {
@@ -96,7 +121,7 @@ async function getJobs(req, res) {
         { skills: { $in: [new RegExp(search, 'i')] } },
       ];
     }
-    if (sector) query.sector = { $regex: sector, $options: 'i' };
+    if (course && course !== 'all') query.course = course;
     if (internship === 'true') query.isInternship = true;
 
     const jobs = await Job.find(query)
@@ -105,7 +130,6 @@ async function getJobs(req, res) {
       .limit(Number(limit));
 
     const total = await Job.countDocuments(query);
-
     res.json({ jobs, total, page: Number(page) });
   } catch (err) {
     res.status(500).json({ error: err.message });
@@ -114,7 +138,10 @@ async function getJobs(req, res) {
 
 async function getTrends(req, res) {
   try {
-    const jobs = await Job.find({});
+    const { course } = req.query;
+    const filter = course && course !== 'all' ? { course } : {};
+    const jobs = await Job.find(filter);
+
     const skillCount = {};
     const companyCount = {};
 
@@ -128,7 +155,7 @@ async function getTrends(req, res) {
     const topSkills = Object.entries(skillCount)
       .sort((a, b) => b[1] - a[1])
       .slice(0, 10)
-      .map(([skill, count]) => ({ skill, count, pct: Math.round((count / jobs.length) * 100) }));
+      .map(([skill, count]) => ({ skill, count, pct: Math.round((count / Math.max(jobs.length, 1)) * 100) }));
 
     const topCompanies = Object.entries(companyCount)
       .sort((a, b) => b[1] - a[1])
@@ -153,11 +180,12 @@ async function getTrends(req, res) {
 
 async function getSkillGap(req, res) {
   try {
-    const { skills } = req.query;
+    const { skills, course } = req.query;
     if (!skills) return res.status(400).json({ error: 'skills query param required' });
 
     const userSkills = skills.split(',').map(s => s.trim().toLowerCase());
-    const jobs = await Job.find({});
+    const filter = course && course !== 'all' ? { course } : {};
+    const jobs = await Job.find(filter);
 
     const demanded = {};
     for (const job of jobs) {
@@ -172,12 +200,12 @@ async function getSkillGap(req, res) {
       .map(([skill, count]) => ({
         skill,
         count,
-        pct: Math.round((count / jobs.length) * 100),
+        pct: Math.round((count / Math.max(jobs.length, 1)) * 100),
         have: userSkills.some(us => us.includes(skill) || skill.includes(us)),
       }));
 
     const have = topDemanded.filter(s => s.have).length;
-    const score = Math.round((have / topDemanded.length) * 100);
+    const score = Math.round((have / Math.max(topDemanded.length, 1)) * 100);
 
     res.json({ score, skills: topDemanded });
   } catch (err) {

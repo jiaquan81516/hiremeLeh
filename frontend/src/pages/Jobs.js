@@ -1,17 +1,10 @@
 import { useEffect, useState, useCallback } from 'react';
 import { fetchJobs } from '../api';
-
-function matchBadge(job, userSkills) {
-  if (!userSkills.length) return null;
-  const jobSkills = job.skills.map(s => s.toLowerCase());
-  const matches = userSkills.filter(us => jobSkills.some(js => js.includes(us) || us.includes(js)));
-  const pct = matches.length / Math.max(jobSkills.length, 1);
-  if (pct >= 0.5) return 'high';
-  if (pct >= 0.25) return 'mid';
-  return 'low';
-}
+import { useCourse } from '../CourseContext';
+import { COURSES } from '../courseConfig';
 
 export default function Jobs() {
+  const { course } = useCourse();
   const [jobs, setJobs] = useState([]);
   const [total, setTotal] = useState(0);
   const [loading, setLoading] = useState(true);
@@ -22,24 +15,23 @@ export default function Jobs() {
 
   const load = useCallback(() => {
     setLoading(true);
-    fetchJobs({ search, internship: internOnly || undefined, page, limit: 15 })
+    fetchJobs({ search, course, internship: internOnly || undefined, page, limit: 15 })
       .then(d => { setJobs(d.jobs || []); setTotal(d.total || 0); })
       .catch(e => setError(e.message))
       .finally(() => setLoading(false));
-  }, [search, internOnly, page]);
+  }, [search, course, internOnly, page]);
 
+  useEffect(() => { setPage(0); }, [course]);
   useEffect(() => { load(); }, [load]);
-
-  const handleSearch = (e) => { setSearch(e.target.value); setPage(0); };
 
   return (
     <div>
       <div className="search-bar">
         <input
           type="text"
-          placeholder="Search roles, skills, companies..."
+          placeholder={`Search ${COURSES[course]?.label} roles, skills, companies...`}
           value={search}
-          onChange={handleSearch}
+          onChange={e => { setSearch(e.target.value); setPage(0); }}
         />
         <label style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 13, color: '#666', whiteSpace: 'nowrap', cursor: 'pointer' }}>
           <input
@@ -52,7 +44,7 @@ export default function Jobs() {
       </div>
 
       <div style={{ fontSize: 12, color: '#aaa', marginBottom: '1rem' }}>
-        {total} roles found
+        {total} roles found for <strong>{COURSES[course]?.label}</strong>
       </div>
 
       {error && <div className="error">{error}</div>}
@@ -60,7 +52,11 @@ export default function Jobs() {
 
       {!loading && (
         <div className="job-list">
-          {jobs.length === 0 && <div className="empty">No jobs found. Try a different search.</div>}
+          {jobs.length === 0 && (
+            <div className="empty">
+              No jobs found for {COURSES[course]?.label}. Try switching to "All Courses" or a different search.
+            </div>
+          )}
           {jobs.map(job => (
             <div className="job-card" key={job._id}>
               <div className="job-top">

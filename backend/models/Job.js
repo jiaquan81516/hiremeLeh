@@ -10,6 +10,7 @@ const jobSchema = new mongoose.Schema({
     display: String,
   },
   skills: [String],
+  course: { type: String, default: 'general' },
   sector: String,
   url: String,
   postedAt: Date,
@@ -18,5 +19,6 @@ const jobSchema = new mongoose.Schema({
 }, { timestamps: true });
 
 jobSchema.index({ title: 'text', company: 'text', skills: 'text' });
+jobSchema.index({ course: 1 });
 
 module.exports = mongoose.model('Job', jobSchema);

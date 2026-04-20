@@ -1,7 +1,7 @@
 const BASE = process.env.REACT_APP_API_URL || '';
 
-export async function fetchTrends() {
-  const res = await fetch(`${BASE}/api/jobs/trends`);
+export async function fetchTrends(course = 'all') {
+  const res = await fetch(`${BASE}/api/jobs/trends?course=${course}`);
   return res.json();
 }
 
@@ -11,8 +11,8 @@ export async function fetchJobs(params = {}) {
   return res.json();
 }
 
-export async function fetchSkillGap(skills) {
-  const res = await fetch(`${BASE}/api/jobs/skillgap?skills=${encodeURIComponent(skills.join(','))}`);
+export async function fetchSkillGap(skills, course = 'all') {
+  const res = await fetch(`${BASE}/api/jobs/skillgap?skills=${encodeURIComponent(skills.join(','))}&course=${course}`);
   return res.json();
 }
 

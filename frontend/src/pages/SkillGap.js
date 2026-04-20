@@ -1,16 +1,22 @@
 import { useState } from 'react';
 import { fetchSkillGap } from '../api';
+import { useCourse } from '../CourseContext';
+import { COURSES } from '../courseConfig';
 
 export default function SkillGap() {
+  const { course } = useCourse();
   const [input, setInput] = useState('');
   const [mySkills, setMySkills] = useState([]);
   const [result, setResult] = useState(null);
   const [loading, setLoading] = useState(false);
 
-  const addSkill = () => {
-    const val = input.trim().toLowerCase();
-    if (!val || mySkills.includes(val)) { setInput(''); return; }
-    const updated = [...mySkills, val];
+  const courseConfig = COURSES[course];
+  const suggestedSkills = courseConfig?.skills?.slice(0, 6) || [];
+
+  const addSkill = (val) => {
+    const s = (val || input).trim().toLowerCase();
+    if (!s || mySkills.includes(s)) { setInput(''); return; }
+    const updated = [...mySkills, s];
     setMySkills(updated);
     setInput('');
     analyze(updated);
@@ -25,7 +31,7 @@ export default function SkillGap() {
 
   const analyze = (skills) => {
     setLoading(true);
-    fetchSkillGap(skills)
+    fetchSkillGap(skills, course)
       .then(setResult)
       .catch(console.error)
       .finally(() => setLoading(false));
@@ -36,29 +42,44 @@ export default function SkillGap() {
     : '#1a1a1a';
 
   const scoreMsg = result
-    ? result.score >= 70
-      ? 'Strong profile! You match most in-demand skills.'
-      : result.score >= 40
-      ? 'Good start — a few more skills will boost your match.'
-      : 'Keep building — focus on the skills below.'
+    ? result.score >= 70 ? 'Strong profile for this track!'
+    : result.score >= 40 ? 'Good start — a few more skills will boost your match.'
+    : 'Keep building — focus on the skills below.'
     : '';
 
   return (
     <div>
       <p className="section-sub">
-        Add your current skills and see how you match against live Singapore job postings.
+        Analyzing skills for <strong>{courseConfig?.label}</strong>. Change your course using the selector at the top.
       </p>
 
       <div className="chip-input-row">
         <input
           type="text"
-          placeholder="Type a skill e.g. Python, SQL, Node.js..."
+          placeholder={`Type a skill e.g. ${suggestedSkills[0] || 'Python'}...`}
           value={input}
           onChange={e => setInput(e.target.value)}
           onKeyDown={e => e.key === 'Enter' && addSkill()}
         />
-        <button className="add-btn" onClick={addSkill}>Add</button>
+        <button className="add-btn" onClick={() => addSkill()}>Add</button>
       </div>
+
+      {suggestedSkills.length > 0 && (
+        <div style={{ marginBottom: '1rem' }}>
+          <div style={{ fontSize: 12, color: '#aaa', marginBottom: 6 }}>Suggested for {courseConfig?.label}:</div>
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
+            {suggestedSkills.filter(s => !mySkills.includes(s)).map(s => (
+              <button
+                key={s}
+                onClick={() => addSkill(s)}
+                style={{ fontSize: 12, padding: '3px 12px', borderRadius: 999, border: '1px dashed #ccc', background: 'transparent', color: '#666', cursor: 'pointer' }}
+              >
+                + {s}
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
 
       {mySkills.length > 0 && (
         <div className="chip-list">
@@ -78,43 +99,36 @@ export default function SkillGap() {
           <div className="card">
             <div className="score-center">
               <div className="score-num" style={{ color: scoreColor }}>{result.score}%</div>
-              <div className="score-label">match against top roles</div>
+              <div className="score-label">match for {courseConfig?.label}</div>
               <div className="score-msg">{scoreMsg}</div>
-            </div>
-            <div style={{ marginTop: '1rem', fontSize: 12, color: '#aaa', textAlign: 'center' }}>
-              Based on {result.skills?.length} most in-demand skills in Singapore
             </div>
           </div>
 
           <div className="card">
             <h3>Skill breakdown</h3>
-            <div>
-              {result.skills?.map(({ skill, pct, have }) => (
-                <div className="gap-item" key={skill}>
-                  <div className={`gap-icon ${have ? 'gap-have' : 'gap-miss'}`}>
-                    {have ? '✓' : '!'}
-                  </div>
-                  <div>
-                    <div className="gap-text">{skill}</div>
-                    <div className="gap-sub">
-                      {have ? 'You have this · ' : 'Missing · '}
-                      in {pct}% of job postings
-                    </div>
+            {result.skills?.map(({ skill, pct, have }) => (
+              <div className="gap-item" key={skill}>
+                <div className={`gap-icon ${have ? 'gap-have' : 'gap-miss'}`}>
+                  {have ? '✓' : '!'}
+                </div>
+                <div>
+                  <div className="gap-text">{skill}</div>
+                  <div className="gap-sub">
+                    {have ? 'You have this · ' : 'Missing · '}
+                    in {pct}% of {courseConfig?.label} postings
                   </div>
                 </div>
-              ))}
-            </div>
+              </div>
+            ))}
           </div>
         </div>
       )}
 
       {mySkills.length === 0 && (
         <div style={{ marginTop: '2rem', padding: '2rem', background: '#f9f9f7', borderRadius: 12, textAlign: 'center' }}>
-          <div style={{ fontSize: 13, color: '#aaa' }}>
-            Start by adding your skills above to see your match score
-          </div>
+          <div style={{ fontSize: 13, color: '#aaa' }}>Add your skills above to see your match score</div>
           <div style={{ fontSize: 12, color: '#bbb', marginTop: 8 }}>
-            Try: Python, JavaScript, SQL, Node.js, MongoDB...
+            Or click the suggested skills for {courseConfig?.label} above
           </div>
         </div>
       )}

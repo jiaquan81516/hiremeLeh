@@ -1,3 +1,5 @@
+require('events').EventEmitter.defaultMaxListeners = 300;
+
 const axios = require('axios');
 const Job = require('../models/Job');
 

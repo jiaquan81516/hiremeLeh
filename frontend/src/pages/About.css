@@ -1,0 +1,230 @@
+.about {
+  max-width: 720px;
+  margin: 0 auto;
+}
+
+/* Hero */
+.about-hero {
+  padding: 2rem 0 2.5rem;
+}
+
+.about-tag {
+  display: inline-block;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  color: #e24b4a;
+  border: 1px solid #e24b4a;
+  border-radius: 999px;
+  padding: 4px 14px;
+  margin-bottom: 1.25rem;
+}
+
+.about-title {
+  font-size: clamp(28px, 5vw, 42px);
+  font-weight: 700;
+  line-height: 1.15;
+  letter-spacing: -1px;
+  color: #1a1a1a;
+  margin-bottom: 1.5rem;
+}
+
+.about-accent {
+  color: #e24b4a;
+}
+
+.about-sub {
+  font-size: 15px;
+  color: #444;
+  line-height: 1.75;
+  margin-bottom: 1rem;
+  max-width: 620px;
+}
+
+/* Divider */
+.about-divider {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: 2.5rem 0 1.75rem;
+}
+
+.about-divider::before,
+.about-divider::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: #e8e8e4;
+}
+
+.about-divider span {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  color: #aaa;
+  white-space: nowrap;
+}
+
+/* Features */
+.about-features {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+}
+
+.about-feature {
+  background: #fff;
+  border: 1px solid #e8e8e4;
+  border-radius: 12px;
+  padding: 1.25rem;
+  transition: border-color 0.15s, transform 0.15s;
+}
+
+.about-feature:hover {
+  border-color: #bbb;
+  transform: translateY(-2px);
+}
+
+.about-feature-emoji {
+  font-size: 24px;
+  margin-bottom: 10px;
+}
+
+.about-feature-title {
+  font-size: 13px;
+  font-weight: 700;
+  color: #1a1a1a;
+  margin-bottom: 6px;
+}
+
+.about-feature-desc {
+  font-size: 12px;
+  color: #666;
+  line-height: 1.6;
+}
+
+/* Courses */
+.about-courses-wrap {
+  background: #f9f9f7;
+  border-radius: 12px;
+  padding: 1.5rem;
+}
+
+.about-courses-intro {
+  font-size: 14px;
+  color: #555;
+  line-height: 1.6;
+  margin-bottom: 1rem;
+}
+
+.about-courses {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.about-course-chip {
+  font-size: 13px;
+  font-weight: 500;
+  padding: 6px 16px;
+  border-radius: 999px;
+  background: #fff;
+  border: 1px solid #e8e8e4;
+  color: #333;
+}
+
+/* Honest section */
+.about-honest {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+.about-honest-card {
+  background: #fff;
+  border: 1px solid #e8e8e4;
+  border-radius: 12px;
+  padding: 1.25rem;
+}
+
+.about-honest-title {
+  font-size: 13px;
+  font-weight: 700;
+  color: #1a1a1a;
+  margin-bottom: 12px;
+}
+
+.about-honest-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.about-honest-list li {
+  font-size: 13px;
+  color: #555;
+  line-height: 1.5;
+}
+
+/* CTA */
+.about-cta-text {
+  font-size: 14px;
+  color: #555;
+  line-height: 1.7;
+  margin-bottom: 1.25rem;
+}
+
+.about-cta-actions {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+}
+
+.about-cta-card {
+  background: #fff;
+  border: 1px solid #e8e8e4;
+  border-radius: 12px;
+  padding: 1.25rem;
+}
+
+.about-cta-num {
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 2px;
+  color: #e24b4a;
+  margin-bottom: 8px;
+}
+
+.about-cta-label {
+  font-size: 13px;
+  color: #1a1a1a;
+  margin-bottom: 6px;
+}
+
+.about-cta-desc {
+  font-size: 12px;
+  color: #888;
+  line-height: 1.5;
+}
+
+/* Footer note */
+.about-footer-note {
+  margin-top: 3rem;
+  padding: 1.5rem 0;
+  font-size: 12px;
+  color: #bbb;
+  border-top: 1px solid #f0f0ee;
+  text-align: center;
+  line-height: 1.6;
+}
+
+@media (max-width: 640px) {
+  .about-features { grid-template-columns: repeat(2, 1fr); }
+  .about-honest { grid-template-columns: 1fr; }
+  .about-cta-actions { grid-template-columns: 1fr; }
+}

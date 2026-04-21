@@ -5,6 +5,7 @@ import SkillGap from './pages/SkillGap';
 import Deadlines from './pages/Deadlines';
 import Insights from './pages/Insights';
 import Resources from './pages/Resources';
+import About from './pages/About';
 import { CourseProvider, useCourse } from './CourseContext';
 import { COURSES } from './courseConfig';
 import './App.css';
@@ -16,6 +17,7 @@ const TABS = [
   { id: 'deadlines', label: 'Deadlines' },
   { id: 'insights', label: 'Peer insights' },
   { id: 'resources', label: 'Resources' },
+  { id: 'about', label: 'About' },
 ];
 
 function CourseSelector() {
@@ -78,6 +80,7 @@ function AppInner() {
         {tab === 'deadlines' && <Deadlines />}
         {tab === 'insights' && <Insights />}
         {tab === 'resources' && <Resources />}
+        {tab === 'about' && <About />}
       </main>
 
       <footer className="footer">

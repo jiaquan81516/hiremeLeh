@@ -65,6 +65,23 @@ export default function About() {
           with 5 years of experience, not overseas markets, not corporate HR teams.
           <strong> Just us.</strong>
         </p>
+        <p className="about-sub">
+          Summer break is coming and I've been struggling to find internships myself.
+          I needed something real, fast — so in between revision sessions during finals,
+          I built this. If you're facing the same stress of not knowing where to apply,
+          what skills to learn, or whether your offer is even worth taking —
+          this is for you.
+        </p>
+        <div className="about-transparency">
+          <span className="about-transparency-tag">Full transparency</span>
+          <p>
+            I built this with the help of Claude (Anthropic's AI) during finals season.
+            Not because I couldn't code it myself, but because I had maybe 3 hours between
+            revision sessions and still wanted to ship something real and useful.
+            Using AI to build faster is a skill too — and honestly, if you're a student
+            not leveraging AI tools yet, you probably should be. 🙂
+          </p>
+        </div>
       </div>
 
       {/* Divider */}

@@ -64,16 +64,16 @@ export default function Jobs() {
 
   const load = useCallback(() => {
     setLoading(true);
-    fetchJobs({
-      search, course, internship: internOnly || undefined,
-      sortBy, companySize: companySize || undefined,
-      workArrangement: workArrangement || undefined,
-      hiddenGems: hiddenGems || undefined,
-      closingSoon: closingSoon || undefined,
-      salaryMin: salaryMin || undefined,
-      salaryMax: salaryMax || undefined,
-      page, limit: 15,
-    })
+    const params = { course, sortBy, page, limit: 15 };
+    if (search) params.search = search;
+    if (internOnly) params.internship = true;
+    if (companySize) params.companySize = companySize;
+    if (workArrangement) params.workArrangement = workArrangement;
+    if (hiddenGems) params.hiddenGems = true;
+    if (closingSoon) params.closingSoon = true;
+    if (salaryMin) params.salaryMin = salaryMin;
+    if (salaryMax) params.salaryMax = salaryMax;
+    fetchJobs(params)
       .then(d => { setJobs(d.jobs || []); setTotal(d.total || 0); })
       .catch(e => setError(e.message))
       .finally(() => setLoading(false));

@@ -4,9 +4,18 @@ const Job = require('../models/Job');
 const MCF_BASE = 'https://api.mycareersfuture.gov.sg/v2';
 
 const ALL_QUERIES = [
-  // Targeted entry-level queries (no overly broad terms)
+  // Targeted entry-level queries
   'fresh graduate singapore', 'entry level singapore',
   'junior executive singapore', 'graduate trainee singapore',
+
+  // Internship-specific with singapore suffix to avoid rate limiting
+  'intern singapore', 'internship singapore',
+  'software intern singapore', 'data intern singapore',
+  'business intern singapore', 'finance intern singapore',
+  'marketing intern singapore', 'accounting intern singapore',
+  'economics intern singapore', 'research intern singapore',
+  'operations intern singapore', 'hr intern singapore',
+  'technology intern singapore', 'engineering intern singapore',
 
   // SCIS
   'software engineer', 'software developer', 'data analyst',

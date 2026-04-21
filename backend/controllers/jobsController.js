@@ -4,9 +4,9 @@ const Job = require('../models/Job');
 const MCF_BASE = 'https://api.mycareersfuture.gov.sg/v2';
 
 const ALL_QUERIES = [
-  // Broad catch-all
-  'intern', 'internship', 'junior', 'associate', 'executive',
-  'fresh graduate', 'entry level', 'trainee', 'attachment',
+  // Targeted entry-level queries (no overly broad terms)
+  'fresh graduate singapore', 'entry level singapore',
+  'junior executive singapore', 'graduate trainee singapore',
 
   // SCIS
   'software engineer', 'software developer', 'data analyst',
@@ -235,8 +235,8 @@ function isStudentRelevant(job) {
 async function syncJobs() {
   try {
     let allJobs = [];
-    for (let i = 0; i < ALL_QUERIES.length; i += 2) {
-      const batch = ALL_QUERIES.slice(i, i + 2);
+    for (let i = 0; i < ALL_QUERIES.length; i += 1) {
+      const batch = ALL_QUERIES.slice(i, i + 1);
       await Promise.all(batch.map(async (q) => {
         try {
           for (let page = 0; page < 1; page++) {
@@ -253,7 +253,7 @@ async function syncJobs() {
           console.error(`Query failed: ${q} — ${e.message}`);
         }
       }));
-      await new Promise(r => setTimeout(r, 3000));
+      await new Promise(r => setTimeout(r, 5000));
     }
 
     const seen = new Set();

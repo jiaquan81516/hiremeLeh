@@ -244,25 +244,47 @@ function isStudentRelevant(job) {
 async function syncJobs() {
   try {
     let allJobs = [];
+
+    // STRATEGY 1: Fetch internships/attachments directly using employmentTypes filter
+    // This bypasses keyword searching and gets ALL internship listings
+    console.log('Fetching internships via employmentTypes filter...');
+    for (let page = 0; page < 20; page++) {
+      try {
+        const res = await axios.get(`${MCF_BASE}/jobs`, {
+          params: {
+            employmentTypes: 'Internship / Attachment',
+            limit: 100,
+            page,
+          },
+          headers: { 'User-Agent': 'HiremeLeh/1.0' },
+          timeout: 15000,
+        });
+        const results = res.data?.results || [];
+        allJobs = allJobs.concat(results);
+        console.log(`Internship page ${page}: ${results.length} jobs`);
+        if (results.length < 100) break;
+        await new Promise(r => setTimeout(r, 2000));
+      } catch (e) {
+        console.error(`Internship page ${page} failed: ${e.message}`);
+        break;
+      }
+    }
+
+    // STRATEGY 2: Keyword search for specific entry-level full-time roles
+    console.log('Fetching entry-level full-time roles via keyword search...');
     for (let i = 0; i < ALL_QUERIES.length; i += 1) {
-      const batch = ALL_QUERIES.slice(i, i + 1);
-      await Promise.all(batch.map(async (q) => {
-        try {
-          for (let page = 0; page < 1; page++) {
-            const res = await axios.get(`${MCF_BASE}/jobs`, {
-              params: { search: q, limit: 50, page },
-              headers: { 'User-Agent': 'HiremeLeh/1.0' },
-              timeout: 12000,
-            });
-            const results = res.data?.results || [];
-            allJobs = allJobs.concat(results);
-            if (results.length < 50) break;
-          }
-        } catch (e) {
-          console.error(`Query failed: ${q} — ${e.message}`);
-        }
-      }));
-      await new Promise(r => setTimeout(r, 5000));
+      const q = ALL_QUERIES[i];
+      try {
+        const res = await axios.get(`${MCF_BASE}/jobs`, {
+          params: { search: q, limit: 50, page: 0 },
+          headers: { 'User-Agent': 'HiremeLeh/1.0' },
+          timeout: 12000,
+        });
+        allJobs = allJobs.concat(res.data?.results || []);
+      } catch (e) {
+        console.error(`Query failed: ${q} — ${e.message}`);
+      }
+      await new Promise(r => setTimeout(r, 3000));
     }
 
     const seen = new Set();

@@ -55,13 +55,18 @@ export default function About() {
         <p className="about-sub">
           Hi! I'm Jia Quan, a Year 1 Information Systems student at SMU.
           I built HiremeLeh! because I was tired of the same frustrations
-          every sem — scrolling through outdated job boards, not knowing
+          — scrolling through outdated job boards, not knowing
           what skills to learn, guessing if a $1,400 stipend was good or not,
-          and missing application deadlines I didn't even know existed.
+          and missing application deadlines I didn't even know existed sia.
         </p>
-        <p className="about-sub">
+        <div className="about-rant">
+          &ldquo;Wah imagine studying for midterms, next moment E&amp;S, WR A3,
+          BQ Final project submission, then study for finals... don't have so
+          much time to slowly source leh!&rdquo;
+        </div>
+        <p className="about-sub" style={{ marginTop: '1.25rem' }}>
           So I built the tool I actually wanted. It's free, it's live, and
-          it's made specifically for Singapore uni students — not fresh grads
+          it's made specifically for SMU students — not fresh grads
           with 5 years of experience, not overseas markets, not corporate HR teams.
           <strong> Just us.</strong>
         </p>
@@ -70,16 +75,16 @@ export default function About() {
           I needed something real, fast — so in between revision sessions during finals,
           I built this. If you're facing the same stress of not knowing where to apply,
           what skills to learn, or whether your offer is even worth taking —
-          this is for you.
+          this might be for you.
         </p>
         <div className="about-transparency">
-          <span className="about-transparency-tag">Full transparency</span>
+          <span className="about-transparency-tag">Disclaimer!</span>
           <p>
-            I built this with the help of Claude (Anthropic's AI) during finals season.
+            I built this with the help of Claude during finals season.
             Not because I couldn't code it myself, but because I had maybe 3 hours between
             revision sessions and still wanted to ship something real and useful.
-            Using AI to build faster is a skill too — and honestly, if you're a student
-            not leveraging AI tools yet, you probably should be. 🙂
+            Leveraging AI to build faster is a skill too — and honestly, if you're a student
+            not leveraging AI tools yet, you probably should be lah. 🙂
           </p>
         </div>
       </div>

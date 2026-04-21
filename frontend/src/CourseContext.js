@@ -4,7 +4,7 @@ const CourseContext = createContext();
 
 export function CourseProvider({ children }) {
   const [course, setCourse] = useState(() => {
-    try { return localStorage.getItem('hiremeLeh_course') || 'is'; } catch { return 'is'; }
+    try { return localStorage.getItem('hiremeLeh_course') || 'scis'; } catch { return 'is'; }
   });
 
   useEffect(() => {

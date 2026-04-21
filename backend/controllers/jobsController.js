@@ -4,42 +4,42 @@ const Job = require('../models/Job');
 const MCF_BASE = 'https://api.mycareersfuture.gov.sg/v2';
 
 const ALL_QUERIES = [
-  // Broad
-  'internship singapore', 'fresh graduate singapore', 'entry level',
-  'junior associate', 'trainee', 'attachment',
-
-  // IS / Tech
+  // SCIS
   'software engineer intern', 'data analyst intern', 'it intern',
-  'backend developer', 'full stack developer', 'systems analyst',
-  'product manager intern', 'business analyst', 'data engineer intern',
-  'cybersecurity intern', 'ux designer intern', 'ui designer intern',
-  'mobile developer intern', 'data science intern', 'ai intern',
-  'machine learning intern', 'network engineer intern',
-
-  // CS
+  'backend developer intern', 'full stack developer intern',
   'software developer intern', 'devops intern', 'cloud engineer intern',
   'frontend developer intern', 'backend engineer intern',
+  'data science intern', 'machine learning intern', 'ai intern',
+  'cybersecurity intern', 'mobile developer intern',
   'software testing intern', 'qa engineer intern',
+  'systems analyst intern', 'data engineer intern',
+  'product manager intern', 'ux designer intern',
 
   // Business
-  'business analyst intern', 'consultant intern', 'marketing intern',
-  'business development intern', 'operations intern', 'management trainee',
+  'business development intern', 'marketing intern',
+  'operations intern', 'management trainee',
   'corporate banking intern', 'investment banking intern',
   'digital marketing intern', 'brand marketing intern',
   'sales intern', 'strategy intern', 'hr intern',
-  'supply chain intern', 'logistics intern', 'commercial analyst',
+  'supply chain intern', 'logistics intern',
+  'consultant intern', 'commercial analyst intern',
 
   // Economics
-  'research analyst intern', 'policy analyst intern', 'economist intern',
-  'quantitative analyst intern', 'market research intern',
-  'financial analyst intern', 'investment analyst intern',
-  'risk analyst intern', 'credit analyst intern',
+  'research analyst intern', 'policy analyst intern',
+  'economist intern', 'quantitative analyst intern',
+  'market research intern', 'financial analyst intern',
+  'investment analyst intern', 'risk analyst intern',
+  'credit analyst intern', 'economic research intern',
 
   // Accountancy
-  'audit intern', 'tax intern', 'assurance intern', 'accounting intern',
-  'finance intern', 'internal audit intern',
+  'audit intern', 'tax intern', 'assurance intern',
+  'accounting intern', 'finance intern', 'internal audit intern',
   'financial reporting intern', 'corporate finance intern',
   'treasury intern', 'compliance intern',
+
+  // Broad
+  'internship singapore', 'fresh graduate singapore',
+  'entry level singapore', 'trainee singapore',
 ];
 
 const SKILL_KEYWORDS = [
@@ -54,45 +54,98 @@ const SKILL_KEYWORDS = [
   'pandas', 'numpy', 'spark', 'accounting', 'financial reporting',
 ];
 
-// Each job can belong to MULTIPLE courses
-const COURSE_PATTERNS = {
-  is: [
-    'software', 'data', 'it ', 'tech', 'system', 'python', 'javascript',
-    'database', 'developer', 'analyst', 'product', 'ux', 'ui',
-    'cybersecurity', 'information', 'digital', 'web ', 'app ',
-  ],
-  cs: [
-    'software engineer', 'backend', 'frontend', 'devops', 'cloud',
-    'machine learning', 'platform', 'swe', 'mobile', 'android',
-    'ios', 'qa', 'testing', 'infrastructure', 'site reliability',
+// TITLE-FIRST classification — checks job title first, only falls back to description if needed
+// Each course has STRICT title keywords and LOOSE description fallbacks
+const COURSE_TITLE_PATTERNS = {
+  scis: [
+    'software engineer', 'software developer', 'backend engineer', 'frontend engineer',
+    'full stack', 'fullstack', 'data analyst', 'data scientist', 'data engineer',
+    'machine learning', 'artificial intelligence', 'ai engineer', 'ml engineer',
+    'devops', 'cloud engineer', 'cybersecurity', 'network engineer',
+    'mobile developer', 'android developer', 'ios developer',
+    'qa engineer', 'test engineer', 'quality assurance',
+    'it intern', 'it analyst', 'systems engineer', 'platform engineer',
+    'ux designer', 'ui designer', 'product designer',
+    'product manager', 'technical analyst', 'database administrator',
+    'site reliability', 'infrastructure engineer', 'security analyst',
   ],
   business: [
-    'business', 'consult', 'marketing', 'operations', 'commercial',
-    'strategy', 'management', 'corporate', 'investment banking',
-    'sales', 'hr ', 'human resource', 'supply chain', 'logistics',
-    'brand', 'digital marketing', 'account manager', 'relationship',
-    'client', 'business development', 'partnerships',
+    'marketing intern', 'digital marketing', 'brand marketing',
+    'business development', 'sales intern', 'sales executive',
+    'operations intern', 'operations analyst', 'operations executive',
+    'management trainee', 'hr intern', 'human resource',
+    'supply chain', 'logistics intern', 'procurement intern',
+    'corporate communications', 'public relations',
+    'account manager', 'client relations', 'customer success',
+    'strategy intern', 'commercial analyst', 'partnerships',
+    'investment banking', 'corporate banking', 'relationship manager',
+    'consultant intern', 'management consultant',
   ],
   economics: [
-    'research', 'policy', 'economist', 'quantitative', 'market research',
-    'economic', 'financial analyst', 'investment analyst', 'risk',
-    'credit analyst', 'fund', 'portfolio', 'macroeconomic',
-    'monetary', 'fiscal', 'regulatory',
+    'research analyst', 'policy analyst', 'economist',
+    'quantitative analyst', 'quant analyst', 'quant researcher',
+    'market research', 'economic research', 'economic analyst',
+    'financial analyst', 'investment analyst', 'portfolio analyst',
+    'risk analyst', 'credit analyst', 'fund analyst',
+    'actuarial', 'data analyst' // data analyst can be econs too but lower priority than scis
   ],
   accountancy: [
-    'audit', 'tax', 'assurance', 'accounti', 'finance intern',
-    'big 4', 'pwc', 'deloitte', 'ernst', 'kpmg', 'grant thornton',
-    'financial report', 'treasury', 'compliance', 'corporate finance',
-    'accounts payable', 'accounts receivable', 'bookkeep',
-    'payroll', 'financial controller', 'cfo', 'cpa',
+    'audit intern', 'audit associate', 'auditor',
+    'tax intern', 'tax associate', 'tax consultant',
+    'assurance intern', 'assurance associate',
+    'accounting intern', 'accountant', 'accounts executive',
+    'finance intern', 'finance executive', 'financial controller',
+    'internal audit', 'external audit',
+    'financial reporting', 'treasury', 'compliance officer',
+    'corporate finance', 'accounts payable', 'accounts receivable',
+    'bookkeeper', 'payroll', 'cpa', 'ca intern',
   ],
 };
 
-// Detect company size from name heuristics
+// Strict priority order — first match wins
+const COURSE_PRIORITY = ['scis', 'accountancy', 'economics', 'business'];
+
+function detectCourses(title, description) {
+  const titleLower = title.toLowerCase();
+
+  // Title-first: check title against each course's patterns in priority order
+  for (const course of COURSE_PRIORITY) {
+    const patterns = COURSE_TITLE_PATTERNS[course];
+    if (patterns.some(p => titleLower.includes(p))) {
+      return [course];
+    }
+  }
+
+  // If title doesn't match anything, do a looser description check
+  // but only for very specific terms to avoid over-tagging
+  const descLower = description.toLowerCase();
+
+  const descPatterns = {
+    scis: ['software development', 'web development', 'app development', 'coding', 'programming'],
+    accountancy: ['big 4', 'pwc', 'deloitte', 'ernst & young', 'kpmg', 'grant thornton', 'financial statements', 'ledger'],
+    economics: ['econometric', 'monetary policy', 'macroeconomic', 'microeconomic', 'fiscal policy'],
+    business: ['go-to-market', 'brand awareness', 'lead generation', 'b2b', 'b2c'],
+  };
+
+  for (const course of COURSE_PRIORITY) {
+    if (descPatterns[course].some(p => descLower.includes(p))) {
+      return [course];
+    }
+  }
+
+  // Truly unclassifiable — tag as general, shows up only in "All Courses"
+  return ['general'];
+}
+
+function extractSkills(text) {
+  const lower = text.toLowerCase();
+  return SKILL_KEYWORDS.filter(skill => lower.includes(skill));
+}
+
 function detectCompanySize(companyName) {
   const name = (companyName || '').toLowerCase();
-  const govKeywords = ['government', 'ministry', 'agency', 'authority', 'board', 'govtech', 'iras', 'cpf', 'hdb', 'lta', 'mas ', 'mof', 'moh', 'nea', 'sla', 'imda', 'edb', 'a*star', 'dsta', 'dso', 'saf', 'spf', 'scdf'];
-  const mncKeywords = ['google', 'meta', 'amazon', 'microsoft', 'apple', 'grab', 'shopee', 'sea ', 'dbs', 'ocbc', 'uob', 'citibank', 'hsbc', 'jp morgan', 'goldman', 'morgan stanley', 'mckinsey', 'bcg', 'bain', 'deloitte', 'pwc', 'kpmg', 'ernst', 'accenture', 'ibm', 'oracle', 'sap', 'salesforce', 'singtel', 'starhub', 'm1 ', 'capitaland', 'jardine', 'wilmar', 'sembcorp', 'keppel', 'st engineering', 'singapore airlines', 'sia ', 'changi'];
+  const govKeywords = ['government', 'ministry', 'agency', 'authority', 'board', 'govtech', 'iras', 'cpf', 'hdb', 'lta', 'mas ', 'mof', 'moh', 'nea', 'sla', 'imda', 'edb', 'a*star', 'dsta', 'dso'];
+  const mncKeywords = ['google', 'meta', 'amazon', 'microsoft', 'apple', 'grab', 'shopee', 'sea ', 'dbs', 'ocbc', 'uob', 'citibank', 'hsbc', 'jp morgan', 'goldman', 'morgan stanley', 'mckinsey', 'bcg', 'bain', 'deloitte', 'pwc', 'kpmg', 'ernst', 'accenture', 'ibm', 'oracle', 'sap', 'salesforce', 'singtel', 'starhub', 'capitaland', 'keppel', 'st engineering', 'singapore airlines'];
   if (govKeywords.some(k => name.includes(k))) return 'government';
   if (mncKeywords.some(k => name.includes(k))) return 'mnc';
   if (name.includes('pte ltd') || name.includes('pte. ltd')) return 'sme';
@@ -106,26 +159,11 @@ function detectWorkArrangement(description) {
   return 'onsite';
 }
 
-function detectCourses(title, description) {
-  const text = (title + ' ' + description).toLowerCase();
-  const matched = [];
-  for (const [course, patterns] of Object.entries(COURSE_PATTERNS)) {
-    if (patterns.some(p => text.includes(p))) matched.push(course);
-  }
-  // If nothing matched, tag as general (shows up in "all")
-  return matched.length > 0 ? matched : ['general'];
-}
-
 function formatSalary(min, max) {
   if (!min && !max) return 'Not stated';
   if (min && max) return `$${min.toLocaleString()}–$${max.toLocaleString()}`;
   if (min) return `From $${min.toLocaleString()}`;
   return `Up to $${max.toLocaleString()}`;
-}
-
-function extractSkills(text) {
-  const lower = text.toLowerCase();
-  return SKILL_KEYWORDS.filter(skill => lower.includes(skill));
 }
 
 async function syncJobs() {
@@ -152,7 +190,6 @@ async function syncJobs() {
       await new Promise(r => setTimeout(r, 500));
     }
 
-    // Deduplicate
     const seen = new Set();
     const unique = allJobs.filter(j => {
       if (!j.uuid || seen.has(j.uuid)) return false;
@@ -179,11 +216,7 @@ async function syncJobs() {
           title,
           company: job.postedCompany?.name || 'Unknown',
           salary: { min: minSalary, max: maxSalary, display: formatSalary(minSalary, maxSalary) },
-          skills,
-          courses,
-          companySize,
-          workArrangement,
-          applicationCount,
+          skills, courses, companySize, workArrangement, applicationCount,
           sector: job.ssocDetailList?.[0]?.ssocTitle || 'General',
           url: `https://www.mycareersfuture.gov.sg/job/${job.uuid}`,
           postedAt: job.metadata?.createdAt ? new Date(job.metadata.createdAt) : new Date(),
@@ -194,7 +227,7 @@ async function syncJobs() {
       );
       saved++;
     }
-    console.log(`Synced ${saved} unique jobs across ${ALL_QUERIES.length} queries`);
+    console.log(`Synced ${saved} unique jobs`);
   } catch (err) {
     console.error('Job sync failed:', err.message);
   }
@@ -218,7 +251,6 @@ async function getJobs(req, res) {
       ];
     }
 
-    // Course filter — jobs now have courses array
     if (course && course !== 'all') {
       query.courses = { $in: [course] };
     }
@@ -226,24 +258,20 @@ async function getJobs(req, res) {
     if (internship === 'true') query.isInternship = true;
     if (companySize) query.companySize = companySize;
     if (workArrangement) query.workArrangement = workArrangement;
-
     if (salaryMin) query['salary.min'] = { $gte: Number(salaryMin) };
     if (salaryMax) query['salary.max'] = { $lte: Number(salaryMax) };
 
-    // Hidden gems: posted in last 48hrs AND fewer than 10 applicants
     if (hiddenGems === 'true') {
       const twoDaysAgo = new Date(Date.now() - 48 * 60 * 60 * 1000);
       query.postedAt = { $gte: twoDaysAgo };
       query.applicationCount = { $lt: 10 };
     }
 
-    // Closing soon: within 7 days
     if (closingSoon === 'true') {
       const sevenDaysFromNow = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000);
       query.closingAt = { $lte: sevenDaysFromNow, $gte: new Date() };
     }
 
-    // Sort options
     const sortMap = {
       recent: { postedAt: -1 },
       leastApplicants: { applicationCount: 1 },

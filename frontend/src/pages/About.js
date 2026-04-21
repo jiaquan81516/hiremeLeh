@@ -34,8 +34,7 @@ const FEATURES = [
 ];
 
 const COURSES = [
-  { label: 'Information Systems', emoji: '💻' },
-  { label: 'Computer Science', emoji: '⚙️' },
+  { label: 'SCIS (Information Systems & Computer Science)', emoji: '💻' },
   { label: 'Business (BBA)', emoji: '📈' },
   { label: 'Economics', emoji: '🏦' },
   { label: 'Accountancy', emoji: '📋' },
@@ -60,9 +59,9 @@ export default function About() {
           and missing application deadlines I didn't even know existed sia.
         </p>
         <div className="about-rant">
-          &ldquo;Wah imagine studying for all my midterms, Lab Tests, next moment E&amp;S Project, WR A3,
-          BQ Final submission, then study for finals... don't have so
-          much time to slowly source intern/jobs leh!&rdquo;
+          &ldquo;Wah imagine studying for midterms, next moment E&amp;S, WR A3,
+          BQ Final project submission, then study for finals... don't have so
+          much time to slowly source leh!&rdquo;
         </div>
         <p className="about-sub" style={{ marginTop: '1.25rem' }}>
           So I built the tool I actually wanted. It's free, it's live, and

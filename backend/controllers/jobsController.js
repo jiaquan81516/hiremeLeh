@@ -4,42 +4,48 @@ const Job = require('../models/Job');
 const MCF_BASE = 'https://api.mycareersfuture.gov.sg/v2';
 
 const ALL_QUERIES = [
-  // SCIS
-  'software engineer intern', 'data analyst intern', 'it intern',
-  'backend developer intern', 'full stack developer intern',
-  'software developer intern', 'devops intern', 'cloud engineer intern',
-  'frontend developer intern', 'backend engineer intern',
-  'data science intern', 'machine learning intern', 'ai intern',
-  'cybersecurity intern', 'mobile developer intern',
-  'software testing intern', 'qa engineer intern',
-  'systems analyst intern', 'data engineer intern',
-  'product manager intern', 'ux designer intern',
+  // Broad catch-all — pulls the most volume
+  'intern', 'internship', 'junior', 'associate', 'executive',
+  'fresh graduate', 'entry level', 'trainee', 'attachment',
+
+  // SCIS — tech roles
+  'software engineer', 'software developer', 'data analyst',
+  'backend developer', 'frontend developer', 'full stack developer',
+  'backend engineer', 'frontend engineer', 'data engineer',
+  'data scientist', 'machine learning engineer', 'ai engineer',
+  'devops engineer', 'cloud engineer', 'cybersecurity analyst',
+  'mobile developer', 'android developer', 'ios developer',
+  'qa engineer', 'software tester', 'systems analyst',
+  'product manager', 'ux designer', 'ui designer',
+  'network engineer', 'site reliability engineer',
+  'information technology', 'it analyst', 'it executive',
+  'web developer', 'application developer',
 
   // Business
-  'business development intern', 'marketing intern',
-  'operations intern', 'management trainee',
-  'corporate banking intern', 'investment banking intern',
-  'digital marketing intern', 'brand marketing intern',
-  'sales intern', 'strategy intern', 'hr intern',
-  'supply chain intern', 'logistics intern',
-  'consultant intern', 'commercial analyst intern',
+  'marketing executive', 'marketing analyst', 'marketing intern',
+  'business analyst', 'business development', 'sales executive',
+  'operations analyst', 'operations executive', 'operations intern',
+  'management trainee', 'hr executive', 'human resource',
+  'supply chain analyst', 'logistics executive', 'procurement analyst',
+  'corporate banking', 'investment banking', 'relationship manager',
+  'strategy analyst', 'consultant', 'commercial analyst',
+  'digital marketing', 'brand executive', 'communications executive',
+  'customer success', 'account manager', 'partnerships manager',
 
   // Economics
-  'research analyst intern', 'policy analyst intern',
-  'economist intern', 'quantitative analyst intern',
-  'market research intern', 'financial analyst intern',
-  'investment analyst intern', 'risk analyst intern',
-  'credit analyst intern', 'economic research intern',
+  'research analyst', 'policy analyst', 'economist',
+  'quantitative analyst', 'market research analyst',
+  'financial analyst', 'investment analyst', 'risk analyst',
+  'credit analyst', 'portfolio analyst', 'fund analyst',
+  'actuarial analyst', 'economic analyst', 'regulatory analyst',
 
   // Accountancy
-  'audit intern', 'tax intern', 'assurance intern',
-  'accounting intern', 'finance intern', 'internal audit intern',
-  'financial reporting intern', 'corporate finance intern',
-  'treasury intern', 'compliance intern',
-
-  // Broad
-  'internship singapore', 'fresh graduate singapore',
-  'entry level singapore', 'trainee singapore',
+  'audit associate', 'audit executive', 'auditor',
+  'tax associate', 'tax executive', 'tax consultant',
+  'assurance associate', 'accountant', 'accounts executive',
+  'finance executive', 'financial controller', 'treasury analyst',
+  'compliance analyst', 'corporate finance analyst',
+  'financial reporting analyst', 'internal auditor',
 ];
 
 const SKILL_KEYWORDS = [

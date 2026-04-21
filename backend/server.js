@@ -1,5 +1,6 @@
 require('dotenv').config();
-require('events').EventEmitter.defaultMaxListeners = 20;
+require('events').EventEmitter.defaultMaxListeners = 100;
+
 const express = require('express');
 const cors = require('cors');
 const mongoose = require('mongoose');
@@ -19,7 +20,15 @@ app.use(cors({
 app.use(express.json());
 
 mongoose.connect(process.env.MONGODB_URI)
-  .then(() => console.log('MongoDB connected'))
+  .then(async () => {
+    console.log('MongoDB connected');
+    console.log('Starting initial job sync...');
+    try {
+      await syncJobs();
+    } catch (e) {
+      console.error('Initial sync error:', e.message);
+    }
+  })
   .catch(err => console.error('MongoDB error:', err));
 
 app.use('/api/jobs', jobsRouter);
@@ -28,14 +37,15 @@ app.use('/api/deadlines', deadlinesRouter);
 
 app.get('/api/health', (req, res) => res.json({ status: 'ok' }));
 
-// Sync jobs from MyCareersFuture every 6 hours
-cron.schedule('0 */6 * * *', () => {
-  console.log('Syncing jobs from MyCareersFuture...');
-  syncJobs();
+// Sync every 6 hours
+cron.schedule('0 */6 * * *', async () => {
+  console.log('Scheduled sync starting...');
+  try {
+    await syncJobs();
+  } catch (e) {
+    console.error('Scheduled sync error:', e.message);
+  }
 });
-
-// Initial sync on startup
-syncJobs();
 
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`));

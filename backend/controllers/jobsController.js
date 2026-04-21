@@ -4,7 +4,7 @@ const Job = require('../models/Job');
 const MCF_BASE = 'https://api.mycareersfuture.gov.sg/v2';
 
 const ALL_QUERIES = [
-  // Broad catch-all — pulls the most volume
+  // Broad catch-all
   'intern', 'internship', 'junior', 'associate', 'executive',
   'fresh graduate', 'entry level', 'trainee', 'attachment',
 
@@ -60,125 +60,93 @@ const SKILL_KEYWORDS = [
   'express', 'tableau', 'firebase', 'git', 'html', 'css',
   'java', 'c++', 'typescript', 'aws', 'docker', 'kubernetes',
   'machine learning', 'data analysis', 'excel', 'power bi',
-  'r programming', 'stata', 'sap', 'myob', 'powerpoint', 'financial modelling',
+  'r', 'stata', 'sap', 'myob', 'powerpoint', 'financial modelling',
   'econometrics', 'salesforce', 'crm', 'ifrs', 'audit', 'tax',
   'figma', 'photoshop', 'swift', 'kotlin', 'flutter',
   'django', 'flask', 'vue', 'angular', 'tensorflow', 'pytorch',
   'pandas', 'numpy', 'spark', 'accounting', 'financial reporting',
 ];
 
-// TITLE-FIRST classification
-// Priority order matters — checked top to bottom, first match wins
-// Accountancy checked before Economics to avoid finance roles being misclassified
-// SCIS checked last among technical to avoid grabbing quant/finance roles
-
 const COURSE_TITLE_PATTERNS = {
   accountancy: [
-    // Audit
     'audit intern', 'audit associate', 'audit executive', 'auditor', 'external audit',
     'internal audit', 'assurance intern', 'assurance associate', 'audit trainee',
-    // Tax
     'tax intern', 'tax associate', 'tax executive', 'tax consultant', 'tax analyst',
     'indirect tax', 'corporate tax', 'transfer pricing',
-    // Accounting
     'accounting intern', 'accountant', 'accounts executive', 'accounts assistant',
     'accounts payable', 'accounts receivable', 'accounting associate',
     'account payable', 'account receivable', 'full set accountant',
     'bookkeeper', 'gl accountant', 'general ledger',
-    // Finance operations
     'finance intern', 'finance executive', 'finance associate', 'finance assistant',
     'financial controller', 'financial reporting', 'financial accounting',
     'treasury analyst', 'treasury intern', 'treasury executive',
     'compliance analyst', 'compliance intern', 'compliance executive',
     'payroll executive', 'payroll analyst', 'payroll intern',
     'corporate finance intern', 'corporate finance analyst',
-    // Big 4 specific
     'assurance trainee', 'audit trainee', 'tax trainee',
   ],
   economics: [
-    // Research & policy
     'research analyst', 'research associate', 'research intern', 'research executive',
     'policy analyst', 'policy intern', 'policy associate', 'policy researcher',
     'economic analyst', 'economist', 'economic research',
-    // Quant & investment
     'quantitative analyst', 'quant analyst', 'quant researcher', 'quant trader',
     'investment analyst', 'investment associate', 'investment intern', 'investment trainee',
     'portfolio analyst', 'portfolio associate', 'fund analyst', 'fund associate',
     'equity analyst', 'equity research', 'fixed income analyst',
     'trading analyst', 'trading associate', 'trading intern', 'commodities analyst',
-    // Risk & credit
     'risk analyst', 'risk associate', 'risk intern', 'credit analyst',
     'credit associate', 'credit intern', 'market risk', 'credit risk',
-    // Market research
     'market research analyst', 'market analyst', 'market intelligence',
-    // Actuarial
     'actuarial analyst', 'actuarial intern', 'actuarial associate', 'actuary',
-    // Valuation & advisory
     'valuation analyst', 'valuation intern', 'financial advisory',
-    'mergers and acquisitions', 'm&a analyst', 'due diligence analyst',
+    'mergers and acquisitions', 'due diligence analyst',
   ],
   scis: [
-    // Software engineering
     'software engineer', 'software developer', 'software intern',
     'backend engineer', 'backend developer', 'frontend engineer', 'frontend developer',
     'full stack', 'fullstack', 'full-stack',
     'mobile developer', 'android developer', 'ios developer',
     'web developer', 'application developer', 'app developer',
-    // Data & AI
     'data scientist', 'data engineer', 'data analyst',
     'machine learning', 'ml engineer', 'ai engineer', 'artificial intelligence',
     'deep learning', 'nlp engineer', 'computer vision',
-    // Infrastructure & cloud
     'devops', 'cloud engineer', 'site reliability', 'infrastructure engineer',
     'platform engineer', 'network engineer', 'systems engineer',
-    // Security
     'cybersecurity', 'security engineer', 'security analyst', 'penetration tester',
-    // Testing
     'qa engineer', 'quality assurance', 'software tester', 'test engineer',
-    // Product & design
     'product manager', 'product analyst', 'ux designer', 'ui designer',
     'product designer', 'ux researcher',
-    // IT
     'it analyst', 'it executive', 'it intern', 'it support',
     'systems analyst', 'business analyst', 'technical analyst',
     'database administrator', 'database analyst',
   ],
   business: [
-    // Marketing
     'marketing executive', 'marketing analyst', 'marketing intern', 'marketing associate',
     'digital marketing', 'brand executive', 'brand analyst', 'brand intern',
     'content creator', 'content marketing', 'social media',
     'communications executive', 'public relations', 'pr executive',
-    // Sales & BD
     'sales executive', 'sales intern', 'sales associate', 'sales analyst',
     'business development', 'commercial analyst', 'partnerships',
     'account manager', 'client relations', 'customer success',
-    // Operations
     'operations executive', 'operations analyst', 'operations intern',
     'supply chain analyst', 'supply chain intern', 'supply chain executive',
     'logistics executive', 'logistics analyst', 'logistics intern',
     'procurement analyst', 'procurement executive', 'procurement intern',
-    // HR
     'hr executive', 'hr analyst', 'hr intern', 'human resource',
-    'talent acquisition', 'recruitment intern', 'people operations',
-    // Strategy & consulting
+    'talent acquisition', 'recruitment intern', 'recruitment consultant', 'people operations',
     'strategy analyst', 'strategy intern', 'strategy associate',
     'management trainee', 'management associate', 'graduate programme',
     'consultant intern', 'consulting analyst', 'management consultant',
-    // Banking (non-quant)
     'relationship manager', 'corporate banking', 'investment banking intern',
     'wealth management', 'private banking', 'retail banking',
   ],
 };
 
-// Priority: accountancy → economics → scis → business
-// Most specific first to avoid misclassification
 const COURSE_PRIORITY = ['accountancy', 'economics', 'scis', 'business'];
 
 function detectCourses(title, description) {
   const titleLower = title.toLowerCase();
 
-  // Title-first: check title against each course's patterns in priority order
   for (const course of COURSE_PRIORITY) {
     const patterns = COURSE_TITLE_PATTERNS[course];
     if (patterns.some(p => titleLower.includes(p))) {
@@ -186,12 +154,9 @@ function detectCourses(title, description) {
     }
   }
 
-  // If title doesn't match anything, do a looser description check
-  // but only for very specific terms to avoid over-tagging
   const descLower = description.toLowerCase();
-
   const descPatterns = {
-    accountancy: ['big 4', 'pwc', 'deloitte', 'ernst & young', 'kpmg', 'grant thornton', 'mazars', 'bdo', 'rsm', 'financial statements', 'general ledger', 'accounts payable', 'accounts receivable', 'bookkeeping', 'sfrs', 'ias ', 'ifrs '],
+    accountancy: ['big 4', 'pwc', 'deloitte', 'ernst & young', 'kpmg', 'grant thornton', 'mazars', 'bdo', 'rsm', 'financial statements', 'general ledger', 'accounts payable', 'accounts receivable', 'bookkeeping', 'sfrs', 'ifrs '],
     economics: ['econometric', 'monetary policy', 'macroeconomic', 'microeconomic', 'fiscal policy', 'investment portfolio', 'asset management', 'hedge fund', 'private equity', 'venture capital', 'fixed income', 'derivatives'],
     scis: ['software development', 'web development', 'app development', 'coding', 'programming', 'agile', 'scrum', 'github', 'version control'],
     business: ['go-to-market', 'brand awareness', 'lead generation', 'b2b', 'b2c', 'crm system', 'customer acquisition'],
@@ -203,13 +168,17 @@ function detectCourses(title, description) {
     }
   }
 
-  // Truly unclassifiable — tag as general, shows up only in "All Courses"
   return ['general'];
 }
 
 function extractSkills(text) {
   const lower = text.toLowerCase();
   return SKILL_KEYWORDS.filter(skill => lower.includes(skill));
+}
+
+function detectCompanySize(companyName) {
+  const name = (companyName || '').toLowerCase();
+  const govKeywords = ['government', 'ministry', 'agency', 'authority', 'board', 'govtech', 'iras', 'cpf', 'hdb', 'lta', 'mas ', 'mof', 'moh', 'nea', 'sla', 'imda', 'edb', 'a*star', 'dsta', 'dso'];
   const mncKeywords = ['google', 'meta', 'amazon', 'microsoft', 'apple', 'grab', 'shopee', 'sea ', 'dbs', 'ocbc', 'uob', 'citibank', 'hsbc', 'jp morgan', 'goldman', 'morgan stanley', 'mckinsey', 'bcg', 'bain', 'deloitte', 'pwc', 'kpmg', 'ernst', 'accenture', 'ibm', 'oracle', 'sap', 'salesforce', 'singtel', 'starhub', 'capitaland', 'keppel', 'st engineering', 'singapore airlines'];
   if (govKeywords.some(k => name.includes(k))) return 'government';
   if (mncKeywords.some(k => name.includes(k))) return 'mnc';
@@ -231,14 +200,46 @@ function formatSalary(min, max) {
   return `Up to $${max.toLocaleString()}`;
 }
 
+function isStudentRelevant(job) {
+  const title = (job.title || '').toLowerCase();
+  const desc = (job.description || '').toLowerCase();
+  const text = title + ' ' + desc;
+
+  // Always keep internships and attachments
+  if (title.includes('intern') || title.includes('attachment')) return true;
+
+  // Reject if min experience > 3 years
+  const minExp = job.minimumYearsExperience || 0;
+  if (minExp > 3) return false;
+
+  // Reject senior/managerial titles
+  const seniorTitles = [
+    'senior', 'sr.', 'lead', 'principal', 'head of', 'director',
+    'vp ', 'vice president', 'chief', 'cto', 'cfo', 'coo', 'ceo',
+    'manager', 'partner', 'president', 'founder', 'c-suite',
+  ];
+  if (seniorTitles.some(s => title.includes(s))) return false;
+
+  // Reject if description explicitly requires many years
+  const expPatterns = [
+    /[4-9]+?s*years?s*(ofs*)?(relevants*)?experience/i,
+    /minimums*[4-9]s*years?/i,
+    /at leasts*[4-9]s*years?/i,
+    /[4-9]s*tos*d+s*years?s*experience/i,
+  ];
+  if (expPatterns.some(p => p.test(text))) return false;
+
+  return true;
+}
+
 async function syncJobs() {
   try {
     let allJobs = [];
-    for (let i = 0; i < ALL_QUERIES.length; i += 5) {
-      const batch = ALL_QUERIES.slice(i, i + 5);
+    for (let i = 0; i < ALL_QUERIES.length; i += 2) {
+      const batch = ALL_QUERIES.slice(i, i + 2);
       await Promise.all(batch.map(async (q) => {
         try {
-          for (let page = 0; page < 2; page++) {
+          for (let page = 0; page < 1; page++) {
             const res = await axios.get(`${MCF_BASE}/jobs`, {
               params: { search: q, limit: 50, page },
               headers: { 'User-Agent': 'HiremeLeh/1.0' },
@@ -252,14 +253,14 @@ async function syncJobs() {
           console.error(`Query failed: ${q} — ${e.message}`);
         }
       }));
-      await new Promise(r => setTimeout(r, 500));
+      await new Promise(r => setTimeout(r, 3000));
     }
 
     const seen = new Set();
     const unique = allJobs.filter(j => {
       if (!j.uuid || seen.has(j.uuid)) return false;
       seen.add(j.uuid);
-      return true;
+      return isStudentRelevant(j);
     });
 
     let saved = 0;

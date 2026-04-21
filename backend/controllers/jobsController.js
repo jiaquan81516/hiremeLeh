@@ -245,29 +245,30 @@ async function syncJobs() {
   try {
     let allJobs = [];
 
-    // STRATEGY 1: Fetch internships/attachments directly using employmentTypes filter
-    // This bypasses keyword searching and gets ALL internship listings
-    console.log('Fetching internships via employmentTypes filter...');
-    for (let page = 0; page < 20; page++) {
-      try {
-        const res = await axios.get(`${MCF_BASE}/jobs`, {
-          params: {
-            employmentTypes: 'Internship / Attachment',
-            limit: 100,
-            page,
-          },
-          headers: { 'User-Agent': 'HiremeLeh/1.0' },
-          timeout: 15000,
-        });
-        const results = res.data?.results || [];
-        allJobs = allJobs.concat(results);
-        console.log(`Internship page ${page}: ${results.length} jobs`);
-        if (results.length < 100) break;
-        await new Promise(r => setTimeout(r, 2000));
-      } catch (e) {
-        console.error(`Internship page ${page} failed: ${e.message}`);
-        break;
+    // STRATEGY 1: Fetch internships via search keyword pagination
+    // MCF employmentTypes filter format is undocumented so we use search + pagination
+    const internshipQueries = ['intern', 'internship', 'attachment'];
+    console.log('Fetching internships via paginated search...');
+    for (const q of internshipQueries) {
+      for (let page = 0; page < 10; page++) {
+        try {
+          const res = await axios.get(`${MCF_BASE}/jobs`, {
+            params: { search: q, limit: 100, page },
+            headers: { 'User-Agent': 'HiremeLeh/1.0' },
+            timeout: 15000,
+          });
+          const results = res.data?.results || [];
+          allJobs = allJobs.concat(results);
+          console.log(`Internship ${q} page ${page}: ${results.length} jobs`);
+          if (results.length < 100) break;
+          await new Promise(r => setTimeout(r, 4000));
+        } catch (e) {
+          console.error(`Internship ${q} page ${page} failed: ${e.message}`);
+          if (e.response?.status === 429) await new Promise(r => setTimeout(r, 10000));
+          break;
+        }
       }
+      await new Promise(r => setTimeout(r, 5000));
     }
 
     // STRATEGY 2: Keyword search for specific entry-level full-time roles

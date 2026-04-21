@@ -1,5 +1,5 @@
 require('dotenv').config();
-require('events').EventEmitter.defaultMaxListeners = 400;
+// No parallel requests so no need to increase max listeners
 
 const express = require('express');
 const cors = require('cors');

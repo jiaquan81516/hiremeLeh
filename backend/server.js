@@ -8,7 +8,6 @@ const cron = require('node-cron');
 
 const jobsRouter = require('./routes/jobs');
 const insightsRouter = require('./routes/insights');
-const deadlinesRouter = require('./routes/deadlines');
 const { syncJobs } = require('./controllers/jobsController');
 
 const app = express();
@@ -33,7 +32,6 @@ mongoose.connect(process.env.MONGODB_URI)
 
 app.use('/api/jobs', jobsRouter);
 app.use('/api/insights', insightsRouter);
-app.use('/api/deadlines', deadlinesRouter);
 
 app.get('/api/health', (req, res) => res.json({ status: 'ok' }));
 

@@ -2,7 +2,6 @@ import { useState } from 'react';
 import Trends from './pages/Trends';
 import Jobs from './pages/Jobs';
 import SkillGap from './pages/SkillGap';
-import Deadlines from './pages/Deadlines';
 import Insights from './pages/Insights';
 import Resources from './pages/Resources';
 import About from './pages/About';
@@ -14,7 +13,6 @@ const TABS = [
   { id: 'trends', label: 'Trends' },
   { id: 'jobs', label: 'Browse jobs' },
   { id: 'gap', label: 'Skill gap' },
-  { id: 'deadlines', label: 'Deadlines' },
   { id: 'insights', label: 'Peer insights' },
   { id: 'resources', label: 'Resources' },
   { id: 'about', label: 'About' },
@@ -77,7 +75,6 @@ function AppInner() {
         {tab === 'trends' && <Trends />}
         {tab === 'jobs' && <Jobs />}
         {tab === 'gap' && <SkillGap />}
-        {tab === 'deadlines' && <Deadlines />}
         {tab === 'insights' && <Insights />}
         {tab === 'resources' && <Resources />}
         {tab === 'about' && <About />}

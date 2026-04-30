@@ -18,8 +18,8 @@ const FEATURES = [
   },
   {
     emoji: '⏰',
-    title: 'Deadline tracker',
-    desc: 'GovTech, DBS, Grab, Shopee — all their internship deadlines in one place. Stop missing applications.',
+    title: 'Closing soon filter',
+    desc: "closing soon filter so you don't miss deadlines!",
   },
   {
     emoji: '👥',
@@ -58,9 +58,7 @@ export default function About() {
           what skills to learn, and missing application deadlines I didn't even know existed sia.
         </p>
         <div className="about-rant">
-          &ldquo;Wah imagine studying for midterms, next moment E&amp;S, WR A3,
-          BQ Final project submission, then study for finals... don't have so
-          much time to slowly source leh!&rdquo;
+        &ldquo;Wah midterms not done, assignments piling up, project submissions, then finals — where got time to slowly source internship one leh 😭&rdquo;
         </div>
         <p className="about-sub" style={{ marginTop: '1.25rem' }}>
           So I built the tool I actually wanted. It's free, it's live, and

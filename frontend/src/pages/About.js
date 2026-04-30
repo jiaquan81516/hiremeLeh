@@ -55,8 +55,7 @@ export default function About() {
           Hi! I'm Jia Quan, a Year 1 Information Systems student at SMU.
           I built HiremeLeh! because I was tired of the same frustrations
           — scrolling through outdated job boards, not knowing
-          what skills to learn, guessing if a $1,400 stipend was good or not,
-          and missing application deadlines I didn't even know existed sia.
+          what skills to learn, and missing application deadlines I didn't even know existed sia.
         </p>
         <div className="about-rant">
           &ldquo;Wah imagine studying for midterms, next moment E&amp;S, WR A3,
@@ -78,7 +77,7 @@ export default function About() {
         <div className="about-transparency">
           <span className="about-transparency-tag">Disclaimer!</span>
           <p>
-            I built this with some help from Claude (Anthropic's AI) — 
+            I built this with some help from Claude — 
             using AI tools to build faster while learning along the way is a skill in itself, 
             and honestly if you're a student not experimenting with them yet, you're missing out lah. 🙂
           </p>

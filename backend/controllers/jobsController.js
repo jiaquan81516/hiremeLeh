@@ -184,7 +184,14 @@ function detectCourses(title, description) {
 
 function extractSkills(text) {
   const lower = text.toLowerCase();
-  return SKILL_KEYWORDS.filter(skill => lower.includes(skill));
+  return SKILL_KEYWORDS.filter(skill => {
+    // For short skills like 'r', require word boundaries
+    if (skill.length <= 2) {
+      const regex = new RegExp(`(^|\\s|,)${skill}(\\s|,|$)`, 'i');
+      return regex.test(lower);
+    }
+    return lower.includes(skill);
+  });
 }
 
 function detectCompanySize(companyName) {

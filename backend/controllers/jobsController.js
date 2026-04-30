@@ -437,7 +437,7 @@ async function getTrends(req, res) {
       .map(([company, count]) => ({ company, count }));
 
     const avgSalary = jobs
-      .filter(j => j.salary?.min)
+      .filter(j => j.salary?.min && !j.isInternship)
       .reduce((sum, j, _, arr) => sum + j.salary.min / arr.length, 0);
 
     res.json({

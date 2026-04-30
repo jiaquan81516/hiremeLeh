@@ -1,5 +1,4 @@
-require('events').EventEmitter.defaultMaxListeners = 300;
-
+require('events').EventEmitter.defaultMaxListeners = 50;
 const axios = require('axios');
 const Job = require('../models/Job');
 
@@ -185,7 +184,6 @@ function detectCourses(title, description) {
 function extractSkills(text) {
   const lower = text.toLowerCase();
   return SKILL_KEYWORDS.filter(skill => {
-    // For short skills like 'r', require word boundaries
     if (skill.length <= 2) {
       const regex = new RegExp(`(^|\\s|,)${skill}(\\s|,|$)`, 'i');
       return regex.test(lower);
@@ -223,14 +221,11 @@ function isStudentRelevant(job) {
   const desc = (job.description || '').toLowerCase();
   const text = title + ' ' + desc;
 
-  // Always keep internships and attachments
   if (title.includes('intern') || title.includes('attachment')) return true;
 
-  // Reject if min experience > 3 years
   const minExp = job.minimumYearsExperience || 0;
   if (minExp > 3) return false;
 
-  // Reject senior/managerial titles
   const seniorTitles = [
     'senior', 'sr.', 'lead', 'principal', 'head of', 'director',
     'vp ', 'vice president', 'chief', 'cto', 'cfo', 'coo', 'ceo',
@@ -238,24 +233,43 @@ function isStudentRelevant(job) {
   ];
   if (seniorTitles.some(s => title.includes(s))) return false;
 
-  // Reject if description explicitly requires many years
   const expPatterns = [
-    /[4-9]+?s*years?s*(ofs*)?(relevants*)?experience/i,
-    /minimums*[4-9]s*years?/i,
-    /at leasts*[4-9]s*years?/i,
-    /[4-9]s*tos*d+s*years?s*experience/i,
+    /[4-9]+?\s*years?\s*(of\s*)?(relevant\s*)?experience/i,
+    /minimum\s*[4-9]\s*years?/i,
+    /at least\s*[4-9]\s*years?/i,
+    /[4-9]\s*to\s*\d+\s*years?\s*experience/i,
   ];
   if (expPatterns.some(p => p.test(text))) return false;
 
   return true;
 }
 
+// Calculates which skills are SCIS-dominant (>60% of appearances in SCIS jobs)
+// Used to filter out tech skills from non-SCIS course skill suggestions
+async function getScisOnlySkills() {
+  const allJobs = await Job.find({}, { skills: 1, courses: 1 });
+  const skillCourseCount = {};
+
+  for (const job of allJobs) {
+    for (const skill of job.skills) {
+      if (!skillCourseCount[skill]) skillCourseCount[skill] = { scis: 0, total: 0 };
+      skillCourseCount[skill].total += 1;
+      if (job.courses && job.courses.includes('scis')) {
+        skillCourseCount[skill].scis += 1;
+      }
+    }
+  }
+
+  // Skills where >60% of appearances are in SCIS jobs → exclude from other courses
+  return Object.entries(skillCourseCount)
+    .filter(([_, counts]) => counts.total >= 5 && counts.scis / counts.total > 0.6)
+    .map(([skill]) => skill);
+}
+
 async function syncJobs() {
   try {
     let allJobs = [];
 
-    // STRATEGY 1: Fetch internships via search keyword pagination
-    // MCF employmentTypes filter format is undocumented so we use search + pagination
     const internshipQueries = ['intern', 'internship', 'attachment'];
     console.log('Fetching internships via paginated search...');
     for (const q of internshipQueries) {
@@ -280,7 +294,6 @@ async function syncJobs() {
       await new Promise(r => setTimeout(r, 5000));
     }
 
-    // STRATEGY 2: Keyword search for specific entry-level full-time roles
     console.log('Fetching entry-level full-time roles via keyword search...');
     for (let i = 0; i < ALL_QUERIES.length; i += 1) {
       const q = ALL_QUERIES[i];
@@ -358,10 +371,7 @@ async function getJobs(req, res) {
       ];
     }
 
-    if (course && course !== 'all') {
-      query.courses = { $in: [course] };
-    }
-
+    if (course && course !== 'all') query.courses = { $in: [course] };
     if (internship === 'true') query.isInternship = true;
     if (companySize) query.companySize = companySize;
     if (workArrangement) query.workArrangement = workArrangement;
@@ -451,9 +461,15 @@ async function getSkillGap(req, res) {
     const filter = course && course !== 'all' ? { courses: { $in: [course] } } : {};
     const jobs = await Job.find(filter);
 
+    // Get SCIS-dominant skills to exclude from non-SCIS courses
+    const scisOnlySkills = (course && course !== 'all' && course !== 'scis')
+      ? await getScisOnlySkills()
+      : [];
+
     const demanded = {};
     for (const job of jobs) {
       for (const skill of job.skills) {
+        if (scisOnlySkills.includes(skill)) continue;
         demanded[skill] = (demanded[skill] || 0) + 1;
       }
     }
@@ -476,22 +492,30 @@ async function getSkillGap(req, res) {
   }
 }
 
-
 async function getTopSkills(req, res) {
   try {
     const { course } = req.query;
     const filter = course && course !== 'all' ? { courses: { $in: [course] } } : {};
     const jobs = await Job.find(filter);
+
+    // Get SCIS-dominant skills to exclude from non-SCIS courses
+    const scisOnlySkills = (course && course !== 'all' && course !== 'scis')
+      ? await getScisOnlySkills()
+      : [];
+
     const demanded = {};
     for (const job of jobs) {
       for (const skill of job.skills) {
+        if (scisOnlySkills.includes(skill)) continue;
         demanded[skill] = (demanded[skill] || 0) + 1;
       }
     }
+
     const top = Object.entries(demanded)
       .sort((a, b) => b[1] - a[1])
       .slice(0, 8)
       .map(([skill]) => skill);
+
     res.json({ skills: top });
   } catch (err) {
     res.status(500).json({ error: err.message });

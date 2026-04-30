@@ -103,27 +103,6 @@ const RESOURCES = [
       },
     ],
   },
-  {
-    category: 'SMU-Specific',
-    items: [
-      {
-        title: 'SMU Career Development Office (CDO)',
-        description: 'Official SMU career portal — internship listings exclusive to SMU students, resume review appointments, and career fairs.',
-        url: 'https://www.smu.edu.sg/campus-life/student-services/career-development',
-        tag: 'SMU',
-        tagColor: '#185FA5',
-        tagBg: '#E6F1FB',
-      },
-      {
-        title: 'SMU TARO (Internship Credit)',
-        description: 'Apply to have your internship recognised for academic credit under SMU\'s internship programme. Check eligibility requirements.',
-        url: 'https://taro.smu.edu.sg',
-        tag: 'SMU',
-        tagColor: '#185FA5',
-        tagBg: '#E6F1FB',
-      },
-    ],
-  },
 ];
 
 export default function Resources() {

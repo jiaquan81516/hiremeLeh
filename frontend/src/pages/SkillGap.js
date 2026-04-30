@@ -13,11 +13,13 @@ export default function SkillGap() {
 
   const courseConfig = COURSES[course];
 
-  useEffect(() => {
-    fetchTopSkills(course)
-      .then(d => setSuggestedSkills(d.skills || []))
-      .catch(() => setSuggestedSkills(courseConfig?.skills?.slice(0, 8) || []));
-  }, [course]);
+useEffect(() => {
+  setMySkills([]);
+  setResult(null);
+  fetchTopSkills(course)
+    .then(d => setSuggestedSkills(d.skills || []))
+    .catch(() => setSuggestedSkills(courseConfig?.skills?.slice(0, 8) || []));
+}, [course]);
 
   const addSkill = (val) => {
     const s = (val || input).trim().toLowerCase();

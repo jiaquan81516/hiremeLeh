@@ -22,6 +22,11 @@ export async function fetchJobs(params = {}) {
   return res.json();
 }
 
+export async function fetchTopSkills(course = 'all') {
+  const res = await fetch(`${BASE}/api/jobs/topskills?course=${course}`);
+  return res.json();
+}
+
 export async function fetchSkillGap(skills, course = 'all') {
   const res = await fetch(`${BASE}/api/jobs/skillgap?skills=${encodeURIComponent(skills.join(','))}&course=${course}`);
   return res.json();

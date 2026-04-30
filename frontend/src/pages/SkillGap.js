@@ -1,5 +1,5 @@
-import { useState } from 'react';
-import { fetchSkillGap } from '../api';
+import { useState, useEffect } from 'react';
+import { fetchSkillGap, fetchTopSkills } from '../api';
 import { useCourse } from '../CourseContext';
 import { COURSES } from '../courseConfig';
 
@@ -9,9 +9,15 @@ export default function SkillGap() {
   const [mySkills, setMySkills] = useState([]);
   const [result, setResult] = useState(null);
   const [loading, setLoading] = useState(false);
+  const [suggestedSkills, setSuggestedSkills] = useState([]);
 
   const courseConfig = COURSES[course];
-  const suggestedSkills = courseConfig?.skills?.slice(0, 6) || [];
+
+  useEffect(() => {
+    fetchTopSkills(course)
+      .then(d => setSuggestedSkills(d.skills || []))
+      .catch(() => setSuggestedSkills(courseConfig?.skills?.slice(0, 8) || []));
+  }, [course]);
 
   const addSkill = (val) => {
     const s = (val || input).trim().toLowerCase();

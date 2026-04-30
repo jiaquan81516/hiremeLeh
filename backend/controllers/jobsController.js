@@ -476,4 +476,26 @@ async function getSkillGap(req, res) {
   }
 }
 
-module.exports = { syncJobs, getJobs, getTrends, getSkillGap };
+
+async function getTopSkills(req, res) {
+  try {
+    const { course } = req.query;
+    const filter = course && course !== 'all' ? { courses: { $in: [course] } } : {};
+    const jobs = await Job.find(filter);
+    const demanded = {};
+    for (const job of jobs) {
+      for (const skill of job.skills) {
+        demanded[skill] = (demanded[skill] || 0) + 1;
+      }
+    }
+    const top = Object.entries(demanded)
+      .sort((a, b) => b[1] - a[1])
+      .slice(0, 8)
+      .map(([skill]) => skill);
+    res.json({ skills: top });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+}
+
+module.exports = { syncJobs, getJobs, getTrends, getSkillGap, getTopSkills };

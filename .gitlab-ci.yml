@@ -48,26 +48,47 @@ frontend_build:
       - frontend/build
   allow_failure: false
 
+ai_chat_bot_preview:
+  stage: frontend_build
+  image: node:24
+  rules:
+    - changes:
+        - frontend/src/pages/AIChatBot.js
+        - frontend/src/App.js
+        - frontend/src/App.css
+        - .gitlab-ci.yml
+  before_script:
+    - cd frontend
+  script:
+    - echo "AI CHAT BOT feature detected"
+    - echo "Mock ATS resume tab files changed"
+    - npm install
+    - npm run build
+  variables:
+    REACT_APP_API_BASE_URL: $REACT_APP_API_BASE_URL
+    CI: "false"
+  allow_failure: false
+
 azure_backend_deploy_preview:
   stage: deploy_preview
   image: node:24
   rules:
-    - when: manual
+    - if: $CI_COMMIT_BRANCH
   script:
     - 'echo "This is a GitLab CI/CD practice deployment step."'
     - 'echo "Backend deployment to Azure App Service would happen here."'
     - 'echo "Use GitLab CI/CD variables instead of hardcoded secrets."'
     - 'echo "Required variable example: AZURE_WEBAPP_PUBLISH_PROFILE"'
-  allow_failure: true
+  allow_failure: false
 
 azure_frontend_deploy_preview:
   stage: deploy_preview
   image: node:24
   rules:
-    - when: manual
+    - if: $CI_COMMIT_BRANCH
   script:
     - 'echo "This is a GitLab CI/CD practice deployment step."'
     - 'echo "Frontend deployment to Azure Static Web Apps would happen here."'
     - 'echo "Use GitLab CI/CD variables instead of hardcoded secrets."'
     - 'echo "Required variable example: AZURE_STATIC_WEB_APPS_API_TOKEN"'
-  allow_failure: true
+  allow_failure: false

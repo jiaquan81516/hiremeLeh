@@ -4,7 +4,7 @@ const isStaticWebApp =
 
 const BASE = (
   process.env.REACT_APP_API_BASE_URL ||
-  (isStaticWebApp ? 'https://hiremeleh-api.azurewebsites.net' : '')
+  (isStaticWebApp ? 'https://hiremeleh-api-ahf9bbbkamhuh7hb.southeastasia-01.azurewebsites.net' : '')
 ).replace(/\/$/, '');
 
 function cleanParams(params) {

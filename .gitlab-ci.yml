@@ -1,0 +1,73 @@
+stages:
+  - backend_check
+  - frontend_build
+  - deploy_preview
+
+variables:
+  NODE_VERSION: "24"
+
+backend_check:
+  stage: backend_check
+  image: node:24
+  rules:
+    - changes:
+        - backend/**/*
+        - .gitlab-ci.yml
+    - when: manual
+  before_script:
+    - cd backend
+  script:
+    - npm install
+    - npm run build --if-present
+  artifacts:
+    when: always
+    expire_in: 1 week
+    paths:
+      - backend/npm-debug.log
+  allow_failure: false
+
+frontend_build:
+  stage: frontend_build
+  image: node:24
+  rules:
+    - changes:
+        - frontend/**/*
+        - .gitlab-ci.yml
+    - when: manual
+  before_script:
+    - cd frontend
+  script:
+    - npm install
+    - npm run build
+  variables:
+    REACT_APP_API_BASE_URL: $REACT_APP_API_BASE_URL
+    CI: "false"
+  artifacts:
+    expire_in: 1 week
+    paths:
+      - frontend/build
+  allow_failure: false
+
+azure_backend_deploy_preview:
+  stage: deploy_preview
+  image: node:24
+  rules:
+    - when: manual
+  script:
+    - echo "This is a GitLab CI/CD practice deployment step."
+    - echo "Backend deployment to Azure App Service would happen here."
+    - echo "Use GitLab CI/CD variables instead of hardcoded secrets."
+    - echo "Required variable example: AZURE_WEBAPP_PUBLISH_PROFILE"
+  allow_failure: true
+
+azure_frontend_deploy_preview:
+  stage: deploy_preview
+  image: node:24
+  rules:
+    - when: manual
+  script:
+    - echo "This is a GitLab CI/CD practice deployment step."
+    - echo "Frontend deployment to Azure Static Web Apps would happen here."
+    - echo "Use GitLab CI/CD variables instead of hardcoded secrets."
+    - echo "Required variable example: AZURE_STATIC_WEB_APPS_API_TOKEN"
+  allow_failure: true

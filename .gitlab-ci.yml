@@ -54,10 +54,10 @@ azure_backend_deploy_preview:
   rules:
     - when: manual
   script:
-    - echo "This is a GitLab CI/CD practice deployment step."
-    - echo "Backend deployment to Azure App Service would happen here."
-    - echo "Use GitLab CI/CD variables instead of hardcoded secrets."
-    - echo "Required variable example: AZURE_WEBAPP_PUBLISH_PROFILE"
+    - 'echo "This is a GitLab CI/CD practice deployment step."'
+    - 'echo "Backend deployment to Azure App Service would happen here."'
+    - 'echo "Use GitLab CI/CD variables instead of hardcoded secrets."'
+    - 'echo "Required variable example: AZURE_WEBAPP_PUBLISH_PROFILE"'
   allow_failure: true
 
 azure_frontend_deploy_preview:
@@ -66,8 +66,8 @@ azure_frontend_deploy_preview:
   rules:
     - when: manual
   script:
-    - echo "This is a GitLab CI/CD practice deployment step."
-    - echo "Frontend deployment to Azure Static Web Apps would happen here."
-    - echo "Use GitLab CI/CD variables instead of hardcoded secrets."
-    - echo "Required variable example: AZURE_STATIC_WEB_APPS_API_TOKEN"
+    - 'echo "This is a GitLab CI/CD practice deployment step."'
+    - 'echo "Frontend deployment to Azure Static Web Apps would happen here."'
+    - 'echo "Use GitLab CI/CD variables instead of hardcoded secrets."'
+    - 'echo "Required variable example: AZURE_STATIC_WEB_APPS_API_TOKEN"'
   allow_failure: true

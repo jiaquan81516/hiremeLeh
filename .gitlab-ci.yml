@@ -4,7 +4,7 @@ stages:
   - deploy_preview
 
 variables:
-  NODE_VERSION: "24"
+  NODE_VERSION: '24'
 
 backend_check:
   stage: backend_check
@@ -41,7 +41,7 @@ frontend_build:
     - npm run build
   variables:
     REACT_APP_API_BASE_URL: $REACT_APP_API_BASE_URL
-    CI: "false"
+    CI: 'false'
   artifacts:
     expire_in: 1 week
     paths:
@@ -66,7 +66,7 @@ ai_chat_bot_preview:
     - npm run build
   variables:
     REACT_APP_API_BASE_URL: $REACT_APP_API_BASE_URL
-    CI: "false"
+    CI: 'false'
   allow_failure: false
 
 azure_backend_deploy_preview:

@@ -13,19 +13,19 @@ const { seedInsights } = require('./controllers/insightsController');
 
 const app = express();
 
-const allowedOrigins = [
-  process.env.FRONTEND_URL,
-  'http://localhost:3000',
-].filter(Boolean);
+const allowedOrigins = [process.env.FRONTEND_URL, 'http://localhost:3000'].filter(Boolean);
 
-app.use(cors({
-  origin: allowedOrigins,
-  methods: ['GET', 'POST'],
-  credentials: true,
-}));
+app.use(
+  cors({
+    origin: allowedOrigins,
+    methods: ['GET', 'POST'],
+    credentials: true,
+  })
+);
 app.use(express.json());
 
-mongoose.connect(process.env.MONGODB_URI)
+mongoose
+  .connect(process.env.MONGODB_URI)
   .then(async () => {
     console.log('MongoDB connected');
     try {
@@ -41,7 +41,7 @@ mongoose.connect(process.env.MONGODB_URI)
       console.error('Initial sync error:', e.message);
     }
   })
-  .catch(err => console.error('MongoDB error:', err));
+  .catch((err) => console.error('MongoDB error:', err));
 
 app.use('/api/jobs', jobsRouter);
 app.use('/api/insights', insightsRouter);

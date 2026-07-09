@@ -14,7 +14,7 @@ export default function Trends() {
     setError(null);
     fetchTrends(course)
       .then(setData)
-      .catch(e => setError(e.message))
+      .catch((e) => setError(e.message))
       .finally(() => setLoading(false));
   }, [course]);
 
@@ -29,7 +29,9 @@ export default function Trends() {
     <div>
       <div style={{ marginBottom: '1rem', display: 'flex', alignItems: 'center', gap: 8 }}>
         <span style={{ fontSize: 13, color: '#888' }}>Showing data for</span>
-        <span style={{ fontSize: 13, fontWeight: 600, color: '#1a1a1a' }}>{COURSES[course]?.label}</span>
+        <span style={{ fontSize: 13, fontWeight: 600, color: '#1a1a1a' }}>
+          {COURSES[course]?.label}
+        </span>
       </div>
 
       <div className="metric-grid">
@@ -45,7 +47,9 @@ export default function Trends() {
         </div>
         <div className="metric">
           <div className="metric-label">Hottest skill</div>
-          <div className="metric-value" style={{ fontSize: 16 }}>{data.topSkills?.[0]?.skill || '—'}</div>
+          <div className="metric-value" style={{ fontSize: 16 }}>
+            {data.topSkills?.[0]?.skill || '—'}
+          </div>
           <div className="metric-sub">most in-demand</div>
         </div>
         <div className="metric">
@@ -58,7 +62,9 @@ export default function Trends() {
       <div className="two-col">
         <div className="card">
           <h3>Most in-demand skills</h3>
-          {data.topSkills?.length === 0 && <div className="empty">No skill data yet for this track.</div>}
+          {data.topSkills?.length === 0 && (
+            <div className="empty">No skill data yet for this track.</div>
+          )}
           {data.topSkills?.map(({ skill, count, pct }) => (
             <div className="skill-bar-row" key={skill}>
               <span className="skill-name">{skill}</span>
@@ -75,7 +81,9 @@ export default function Trends() {
 
         <div className="card">
           <h3>Top hiring companies</h3>
-          {data.topCompanies?.length === 0 && <div className="empty">No company data yet for this track.</div>}
+          {data.topCompanies?.length === 0 && (
+            <div className="empty">No company data yet for this track.</div>
+          )}
           {data.topCompanies?.map(({ company, count }) => (
             <div className="skill-bar-row" key={company}>
               <span className="skill-name">{company}</span>

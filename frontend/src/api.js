@@ -1,16 +1,23 @@
 const isStaticWebApp =
-  typeof window !== 'undefined' &&
-  window.location.hostname.endsWith('.azurestaticapps.net');
+  typeof window !== 'undefined' && window.location.hostname.endsWith('.azurestaticapps.net');
 
 const BASE = (
   process.env.REACT_APP_API_BASE_URL ||
-  (isStaticWebApp ? 'https://hiremeleh-api-ahf9bbbkamhuh7hb.southeastasia-01.azurewebsites.net' : '')
+  (isStaticWebApp
+    ? 'https://hiremeleh-api-ahf9bbbkamhuh7hb.southeastasia-01.azurewebsites.net'
+    : '')
 ).replace(/\/$/, '');
 
 function cleanParams(params) {
   const cleaned = {};
   for (const [key, value] of Object.entries(params)) {
-    if (value !== undefined && value !== null && value !== 'undefined' && value !== '' && value !== false) {
+    if (
+      value !== undefined &&
+      value !== null &&
+      value !== 'undefined' &&
+      value !== '' &&
+      value !== false
+    ) {
       cleaned[key] = value;
     }
   }
@@ -35,7 +42,9 @@ export async function fetchTopSkills(course = 'all') {
 }
 
 export async function fetchSkillGap(skills, course = 'all') {
-  const res = await fetch(`${BASE}/api/jobs/skillgap?skills=${encodeURIComponent(skills.join(','))}&course=${course}`);
+  const res = await fetch(
+    `${BASE}/api/jobs/skillgap?skills=${encodeURIComponent(skills.join(','))}&course=${course}`
+  );
   return res.json();
 }
 

@@ -25,7 +25,7 @@ function CourseSelector() {
   return (
     <select
       value={course}
-      onChange={e => setCourse(e.target.value)}
+      onChange={(e) => setCourse(e.target.value)}
       style={{
         padding: '5px 10px',
         borderRadius: 999,
@@ -38,7 +38,9 @@ function CourseSelector() {
       }}
     >
       {Object.entries(COURSES).map(([key, val]) => (
-        <option key={key} value={key}>{val.label}</option>
+        <option key={key} value={key}>
+          {val.label}
+        </option>
       ))}
     </select>
   );
@@ -51,7 +53,9 @@ function AppInner() {
     <div className="app-shell">
       <header className="header">
         <div className="header-inner">
-          <div className="logo">HiremeLeh<span className="logo-accent">!</span></div>
+          <div className="logo">
+            HiremeLeh<span className="logo-accent">!</span>
+          </div>
           <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
             <CourseSelector />
             <div className="live-badge">Live · MyCareersFuture</div>
@@ -61,7 +65,7 @@ function AppInner() {
 
       <nav className="nav">
         <div className="nav-inner">
-          {TABS.map(t => (
+          {TABS.map((t) => (
             <button
               key={t.id}
               className={`nav-btn ${tab === t.id ? 'active' : ''}`}

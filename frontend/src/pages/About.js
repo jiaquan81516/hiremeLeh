@@ -47,37 +47,38 @@ export default function About() {
       <div className="about-hero">
         <div className="about-tag">Built by a student · For students</div>
         <h1 className="about-title">
-          The internship platform<br />
-          <span className="about-accent">we wish existed</span><br />
+          The internship platform
+          <br />
+          <span className="about-accent">we wish existed</span>
+          <br />
           when we started uni.
         </h1>
         <p className="about-sub">
-          Hi! I'm Jia Quan, a Year 1 Information Systems student at SMU.
-          I built HiremeLeh! because I was tired of the same frustrations
-          — scrolling through outdated job boards, not knowing
+          Hi! I'm Jia Quan, a Year 1 Information Systems student at SMU. I built HiremeLeh! because
+          I was tired of the same frustrations — scrolling through outdated job boards, not knowing
           what skills to learn, and missing application deadlines I didn't even know existed sia.
         </p>
         <div className="about-rant">
-        &ldquo;Wah midterms not done, assignments piling up, project submissions, then finals — where got time to slowly source internship one leh 😭&rdquo;
+          &ldquo;Wah midterms not done, assignments piling up, project submissions, then finals —
+          where got time to slowly source internship one leh 😭&rdquo;
         </div>
         <p className="about-sub" style={{ marginTop: '1.25rem' }}>
-          So I built the tool I actually wanted. It's free, it's live, and
-          it's made specifically for SMU students — not fresh grads
-          with 5 years of experience, not overseas markets, not corporate HR teams.
+          So I built the tool I actually wanted. It's free, it's live, and it's made specifically
+          for SMU students — not fresh grads with 5 years of experience, not overseas markets, not
+          corporate HR teams.
           <strong> Just us.</strong>
         </p>
         <p className="about-sub">
-          Summer break is coming and honestly, I've been stressing about finding an internship too. 
-          So instead of just waiting around,
-           I built something. If you're in the same boat — not sure where to apply, 
-           what skills actually matter, this might be for you.
+          Summer break is coming and honestly, I've been stressing about finding an internship too.
+          So instead of just waiting around, I built something. If you're in the same boat — not
+          sure where to apply, what skills actually matter, this might be for you.
         </p>
         <div className="about-transparency">
           <span className="about-transparency-tag">Disclaimer!</span>
           <p>
-            I built this with some help from Claude — 
-            using AI tools to build faster while learning along the way is a skill in itself, 
-            and honestly if you're a student not experimenting with them yet, you're missing out lah. 🙂
+            I built this with some help from Claude — using AI tools to build faster while learning
+            along the way is a skill in itself, and honestly if you're a student not experimenting
+            with them yet, you're missing out lah. 🙂
           </p>
         </div>
       </div>
@@ -89,7 +90,7 @@ export default function About() {
 
       {/* Features grid */}
       <div className="about-features">
-        {FEATURES.map(f => (
+        {FEATURES.map((f) => (
           <div className="about-feature" key={f.title}>
             <div className="about-feature-emoji">{f.emoji}</div>
             <div className="about-feature-title">{f.title}</div>
@@ -106,11 +107,11 @@ export default function About() {
       {/* Courses */}
       <div className="about-courses-wrap">
         <p className="about-courses-intro">
-          Not just for tech students. HiremeLeh! has tailored job feeds,
-          skill benchmarks, and company deadlines for:
+          Not just for tech students. HiremeLeh! has tailored job feeds, skill benchmarks, and
+          company deadlines for:
         </p>
         <div className="about-courses">
-          {COURSES.map(c => (
+          {COURSES.map((c) => (
             <div className="about-course-chip" key={c.label}>
               {c.emoji} {c.label}
             </div>
@@ -156,20 +157,24 @@ export default function About() {
       {/* CTA */}
       <div className="about-cta">
         <p className="about-cta-text">
-          The more students contribute peer insights, the more useful this becomes for everyone.
-          If you've done an internship — even a short one — please share your experience.
-          It takes 2 minutes and genuinely helps the next person.
+          The more students contribute peer insights, the more useful this becomes for everyone. If
+          you've done an internship — even a short one — please share your experience. It takes 2
+          minutes and genuinely helps the next person.
         </p>
         <div className="about-cta-actions">
           <div className="about-cta-card">
             <div className="about-cta-num">01</div>
-            <div className="about-cta-label">Go to <strong>Peer insights</strong></div>
+            <div className="about-cta-label">
+              Go to <strong>Peer insights</strong>
+            </div>
             <div className="about-cta-desc">Click "Share yours" and fill in what you know</div>
           </div>
           <div className="about-cta-card">
             <div className="about-cta-num">02</div>
             <div className="about-cta-label">Share with a friend</div>
-            <div className="about-cta-desc">Send the link to your coursemates — the more the merrier</div>
+            <div className="about-cta-desc">
+              Send the link to your coursemates — the more the merrier
+            </div>
           </div>
           <div className="about-cta-card">
             <div className="about-cta-num">03</div>
@@ -178,8 +183,8 @@ export default function About() {
               Email me at{' '}
               <a href="mailto:jiaquan81516@gmail.com" style={{ color: '#e24b4a' }}>
                 jiaquan81516@gmail.com
-              </a>
-              {' '}— I actually read every message
+              </a>{' '}
+              — I actually read every message
             </div>
           </div>
         </div>

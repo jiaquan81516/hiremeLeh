@@ -27,8 +27,8 @@ export default function AIChatBot() {
         <div className="ai-bot-kicker">Mock career copilot</div>
         <h2>AI CHAT BOT</h2>
         <p>
-          Upload a resume, type what role you want, and preview a mock ATS-style review.
-          This display is for demonstration only and does not analyse the actual file.
+          Upload a resume, type what role you want, and preview a mock ATS-style review. This
+          display is for demonstration only and does not analyse the actual file.
         </p>
       </div>
 
@@ -37,7 +37,9 @@ export default function AIChatBot() {
           <div className="card">
             <div className="ai-bot-grid">
               <div className="form-group">
-                <label className="ai-bot-label" htmlFor="resume-upload">Resume upload</label>
+                <label className="ai-bot-label" htmlFor="resume-upload">
+                  Resume upload
+                </label>
                 <input
                   id="resume-upload"
                   type="file"
@@ -46,7 +48,9 @@ export default function AIChatBot() {
                 />
               </div>
               <div className="form-group">
-                <label className="ai-bot-label" htmlFor="chat-request">Target role or search prompt</label>
+                <label className="ai-bot-label" htmlFor="chat-request">
+                  Target role or search prompt
+                </label>
                 <textarea
                   id="chat-request"
                   placeholder="Example: Product analyst internship at a Singapore startup"
@@ -81,12 +85,14 @@ export default function AIChatBot() {
             <h3>Top ATS signals</h3>
             <div className="ai-bot-chip-row">
               {MOCK_KEYWORDS.map((item) => (
-                <span className="tag" key={item}>{item}</span>
+                <span className="tag" key={item}>
+                  {item}
+                </span>
               ))}
             </div>
             <div className="ai-bot-summary">
-              Resume uploaded and prompt captured. The mock display hides the input step after submit
-              and shows a fixed ATS-style review panel for demo purposes.
+              Resume uploaded and prompt captured. The mock display hides the input step after
+              submit and shows a fixed ATS-style review panel for demo purposes.
             </div>
           </div>
 
@@ -94,7 +100,9 @@ export default function AIChatBot() {
             <h3>Suggested improvements</h3>
             <div className="ai-bot-fix-list">
               {MOCK_FIXES.map((item) => (
-                <div className="ai-bot-fix" key={item}>{item}</div>
+                <div className="ai-bot-fix" key={item}>
+                  {item}
+                </div>
               ))}
             </div>
           </div>

@@ -74,15 +74,42 @@ export default function Jobs() {
     if (salaryMin) params.salaryMin = salaryMin;
     if (salaryMax) params.salaryMax = salaryMax;
     fetchJobs(params)
-      .then(d => { setJobs(d.jobs || []); setTotal(d.total || 0); })
-      .catch(e => setError(e.message))
+      .then((d) => {
+        setJobs(d.jobs || []);
+        setTotal(d.total || 0);
+      })
+      .catch((e) => setError(e.message))
       .finally(() => setLoading(false));
-  }, [search, course, internOnly, sortBy, companySize, workArrangement, hiddenGems, closingSoon, salaryMin, salaryMax, page]);
+  }, [
+    search,
+    course,
+    internOnly,
+    sortBy,
+    companySize,
+    workArrangement,
+    hiddenGems,
+    closingSoon,
+    salaryMin,
+    salaryMax,
+    page,
+  ]);
 
-  useEffect(() => { setPage(0); }, [course]);
-  useEffect(() => { load(); }, [load]);
+  useEffect(() => {
+    setPage(0);
+  }, [course]);
+  useEffect(() => {
+    load();
+  }, [load]);
 
-  const activeFilterCount = [internOnly, companySize, workArrangement, hiddenGems, closingSoon, salaryMin, salaryMax].filter(Boolean).length;
+  const activeFilterCount = [
+    internOnly,
+    companySize,
+    workArrangement,
+    hiddenGems,
+    closingSoon,
+    salaryMin,
+    salaryMax,
+  ].filter(Boolean).length;
 
   return (
     <div>
@@ -92,23 +119,50 @@ export default function Jobs() {
           type="text"
           placeholder={`Search ${COURSES[course]?.label} roles...`}
           value={search}
-          onChange={e => { setSearch(e.target.value); setPage(0); }}
-          style={{ flex: 1, minWidth: 200, padding: '9px 14px', borderRadius: 8, border: '1px solid #e8e8e4', fontSize: 13 }}
+          onChange={(e) => {
+            setSearch(e.target.value);
+            setPage(0);
+          }}
+          style={{
+            flex: 1,
+            minWidth: 200,
+            padding: '9px 14px',
+            borderRadius: 8,
+            border: '1px solid #e8e8e4',
+            fontSize: 13,
+          }}
         />
         <select
           value={sortBy}
-          onChange={e => { setSortBy(e.target.value); setPage(0); }}
-          style={{ padding: '9px 14px', borderRadius: 8, border: '1px solid #e8e8e4', fontSize: 13, background: '#fff' }}
+          onChange={(e) => {
+            setSortBy(e.target.value);
+            setPage(0);
+          }}
+          style={{
+            padding: '9px 14px',
+            borderRadius: 8,
+            border: '1px solid #e8e8e4',
+            fontSize: 13,
+            background: '#fff',
+          }}
         >
-          {SORT_OPTIONS.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
+          {SORT_OPTIONS.map((o) => (
+            <option key={o.value} value={o.value}>
+              {o.label}
+            </option>
+          ))}
         </select>
         <button
-          onClick={() => setShowFilters(f => !f)}
+          onClick={() => setShowFilters((f) => !f)}
           style={{
-            padding: '9px 16px', borderRadius: 8, border: '1px solid #e8e8e4',
+            padding: '9px 16px',
+            borderRadius: 8,
+            border: '1px solid #e8e8e4',
             background: showFilters ? '#1a1a1a' : '#fff',
             color: showFilters ? '#fff' : '#1a1a1a',
-            fontSize: 13, cursor: 'pointer', whiteSpace: 'nowrap',
+            fontSize: 13,
+            cursor: 'pointer',
+            whiteSpace: 'nowrap',
           }}
         >
           Filters {activeFilterCount > 0 ? `(${activeFilterCount})` : ''}
@@ -117,7 +171,17 @@ export default function Jobs() {
 
       {/* Expanded filters */}
       {showFilters && (
-        <div style={{ background: '#f9f9f7', borderRadius: 12, padding: '1rem', marginBottom: '1rem', display: 'flex', flexDirection: 'column', gap: 12 }}>
+        <div
+          style={{
+            background: '#f9f9f7',
+            borderRadius: 12,
+            padding: '1rem',
+            marginBottom: '1rem',
+            display: 'flex',
+            flexDirection: 'column',
+            gap: 12,
+          }}
+        >
           {/* Quick toggles */}
           <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
             {[
@@ -127,12 +191,18 @@ export default function Jobs() {
             ].map(({ label, value, set }) => (
               <button
                 key={label}
-                onClick={() => { set(v => !v); setPage(0); }}
+                onClick={() => {
+                  set((v) => !v);
+                  setPage(0);
+                }}
                 style={{
-                  padding: '6px 14px', borderRadius: 999, border: '1px solid #e8e8e4',
+                  padding: '6px 14px',
+                  borderRadius: 999,
+                  border: '1px solid #e8e8e4',
                   background: value ? '#1a1a1a' : '#fff',
                   color: value ? '#fff' : '#666',
-                  fontSize: 12, cursor: 'pointer',
+                  fontSize: 12,
+                  cursor: 'pointer',
                 }}
               >
                 {label}
@@ -144,17 +214,43 @@ export default function Jobs() {
           <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
             <select
               value={companySize}
-              onChange={e => { setCompanySize(e.target.value); setPage(0); }}
-              style={{ padding: '7px 12px', borderRadius: 8, border: '1px solid #e8e8e4', fontSize: 13, background: '#fff' }}
+              onChange={(e) => {
+                setCompanySize(e.target.value);
+                setPage(0);
+              }}
+              style={{
+                padding: '7px 12px',
+                borderRadius: 8,
+                border: '1px solid #e8e8e4',
+                fontSize: 13,
+                background: '#fff',
+              }}
             >
-              {COMPANY_SIZES.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
+              {COMPANY_SIZES.map((o) => (
+                <option key={o.value} value={o.value}>
+                  {o.label}
+                </option>
+              ))}
             </select>
             <select
               value={workArrangement}
-              onChange={e => { setWorkArrangement(e.target.value); setPage(0); }}
-              style={{ padding: '7px 12px', borderRadius: 8, border: '1px solid #e8e8e4', fontSize: 13, background: '#fff' }}
+              onChange={(e) => {
+                setWorkArrangement(e.target.value);
+                setPage(0);
+              }}
+              style={{
+                padding: '7px 12px',
+                borderRadius: 8,
+                border: '1px solid #e8e8e4',
+                fontSize: 13,
+                background: '#fff',
+              }}
             >
-              {WORK_ARRANGEMENTS.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
+              {WORK_ARRANGEMENTS.map((o) => (
+                <option key={o.value} value={o.value}>
+                  {o.label}
+                </option>
+              ))}
             </select>
           </div>
 
@@ -165,26 +261,68 @@ export default function Jobs() {
               type="number"
               placeholder="Min $"
               value={salaryMin}
-              onChange={e => { setSalaryMin(e.target.value); setPage(0); }}
-              style={{ width: 90, padding: '6px 10px', borderRadius: 8, border: '1px solid #e8e8e4', fontSize: 13 }}
+              onChange={(e) => {
+                setSalaryMin(e.target.value);
+                setPage(0);
+              }}
+              style={{
+                width: 90,
+                padding: '6px 10px',
+                borderRadius: 8,
+                border: '1px solid #e8e8e4',
+                fontSize: 13,
+              }}
             />
             <span style={{ fontSize: 12, color: '#aaa' }}>to</span>
             <input
               type="number"
               placeholder="Max $"
               value={salaryMax}
-              onChange={e => { setSalaryMax(e.target.value); setPage(0); }}
-              style={{ width: 90, padding: '6px 10px', borderRadius: 8, border: '1px solid #e8e8e4', fontSize: 13 }}
+              onChange={(e) => {
+                setSalaryMax(e.target.value);
+                setPage(0);
+              }}
+              style={{
+                width: 90,
+                padding: '6px 10px',
+                borderRadius: 8,
+                border: '1px solid #e8e8e4',
+                fontSize: 13,
+              }}
             />
             {(salaryMin || salaryMax) && (
-              <button onClick={() => { setSalaryMin(''); setSalaryMax(''); }} style={{ fontSize: 12, color: '#aaa', background: 'none', border: 'none', cursor: 'pointer' }}>Clear</button>
+              <button
+                onClick={() => {
+                  setSalaryMin('');
+                  setSalaryMax('');
+                }}
+                style={{
+                  fontSize: 12,
+                  color: '#aaa',
+                  background: 'none',
+                  border: 'none',
+                  cursor: 'pointer',
+                }}
+              >
+                Clear
+              </button>
             )}
           </div>
 
           {/* Hidden gems explanation */}
           {hiddenGems && (
-            <div style={{ fontSize: 12, color: '#888', background: '#fff', padding: '8px 12px', borderRadius: 8, border: '1px solid #e8e8e4' }}>
-              💎 Hidden gems = posted in the last 48hrs with fewer than 10 applicants. Apply fast for the best chance!
+            <div
+              style={{
+                fontSize: 12,
+                color: '#888',
+                background: '#fff',
+                padding: '8px 12px',
+                borderRadius: 8,
+                border: '1px solid #e8e8e4',
+              }}
+            >
+              💎 Hidden gems = posted in the last 48hrs with fewer than 10 applicants. Apply fast
+              for the best chance!
             </div>
           )}
         </div>
@@ -204,48 +342,135 @@ export default function Jobs() {
               No jobs found. Try switching to "All Courses" or adjusting your filters.
             </div>
           )}
-          {jobs.map(job => {
+          {jobs.map((job) => {
             const daysLeft = daysUntilClose(job.closingAt);
             const isUrgent = daysLeft !== null && daysLeft <= 7;
-            const isNew = job.postedAt && (new Date() - new Date(job.postedAt)) < 48 * 60 * 60 * 1000;
+            const isNew = job.postedAt && new Date() - new Date(job.postedAt) < 48 * 60 * 60 * 1000;
             const isHidden = isNew && job.applicationCount < 10;
 
             return (
               <div className="job-card" key={job._id}>
                 <div className="job-top">
                   <div style={{ flex: 1 }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: 6, flexWrap: 'wrap', marginBottom: 2 }}>
+                    <div
+                      style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: 6,
+                        flexWrap: 'wrap',
+                        marginBottom: 2,
+                      }}
+                    >
                       <div className="job-title">{job.title}</div>
-                      {isHidden && <span style={{ fontSize: 10, padding: '2px 7px', borderRadius: 999, background: '#EEEDFE', color: '#533AB7', fontWeight: 700 }}>💎 Hidden gem</span>}
-                      {isUrgent && <span style={{ fontSize: 10, padding: '2px 7px', borderRadius: 999, background: '#FCEBEB', color: '#A32D2D', fontWeight: 700 }}>⏰ {daysLeft}d left</span>}
-                      {isNew && !isHidden && <span style={{ fontSize: 10, padding: '2px 7px', borderRadius: 999, background: '#EAF3DE', color: '#3B6D11', fontWeight: 700 }}>New</span>}
+                      {isHidden && (
+                        <span
+                          style={{
+                            fontSize: 10,
+                            padding: '2px 7px',
+                            borderRadius: 999,
+                            background: '#EEEDFE',
+                            color: '#533AB7',
+                            fontWeight: 700,
+                          }}
+                        >
+                          💎 Hidden gem
+                        </span>
+                      )}
+                      {isUrgent && (
+                        <span
+                          style={{
+                            fontSize: 10,
+                            padding: '2px 7px',
+                            borderRadius: 999,
+                            background: '#FCEBEB',
+                            color: '#A32D2D',
+                            fontWeight: 700,
+                          }}
+                        >
+                          ⏰ {daysLeft}d left
+                        </span>
+                      )}
+                      {isNew && !isHidden && (
+                        <span
+                          style={{
+                            fontSize: 10,
+                            padding: '2px 7px',
+                            borderRadius: 999,
+                            background: '#EAF3DE',
+                            color: '#3B6D11',
+                            fontWeight: 700,
+                          }}
+                        >
+                          New
+                        </span>
+                      )}
                     </div>
                     <div className="job-company">{job.company}</div>
                   </div>
                   <div style={{ textAlign: 'right', flexShrink: 0 }}>
                     <div className="job-salary">{job.salary?.display || 'Not stated'}</div>
-                    <div style={{ fontSize: 11, color: '#aaa', marginTop: 2 }}>{timeAgo(job.postedAt)}</div>
+                    <div style={{ fontSize: 11, color: '#aaa', marginTop: 2 }}>
+                      {timeAgo(job.postedAt)}
+                    </div>
                   </div>
                 </div>
 
                 {/* Tags row */}
                 <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', marginTop: 8 }}>
                   {job.companySize && job.companySize !== 'unknown' && (
-                    <span style={{ fontSize: 11, padding: '2px 8px', borderRadius: 999, background: '#f0f0ee', color: '#666', border: '1px solid #e8e8e4' }}>
-                      {job.companySize === 'government' ? '🏛' : job.companySize === 'mnc' ? '🌐' : job.companySize === 'startup' ? '🚀' : '🏢'} {job.companySize}
+                    <span
+                      style={{
+                        fontSize: 11,
+                        padding: '2px 8px',
+                        borderRadius: 999,
+                        background: '#f0f0ee',
+                        color: '#666',
+                        border: '1px solid #e8e8e4',
+                      }}
+                    >
+                      {job.companySize === 'government'
+                        ? '🏛'
+                        : job.companySize === 'mnc'
+                          ? '🌐'
+                          : job.companySize === 'startup'
+                            ? '🚀'
+                            : '🏢'}{' '}
+                      {job.companySize}
                     </span>
                   )}
                   {job.workArrangement && job.workArrangement !== 'onsite' && (
-                    <span style={{ fontSize: 11, padding: '2px 8px', borderRadius: 999, background: '#f0f0ee', color: '#666', border: '1px solid #e8e8e4' }}>
+                    <span
+                      style={{
+                        fontSize: 11,
+                        padding: '2px 8px',
+                        borderRadius: 999,
+                        background: '#f0f0ee',
+                        color: '#666',
+                        border: '1px solid #e8e8e4',
+                      }}
+                    >
                       {job.workArrangement === 'remote' ? '🏠 Remote' : '🔄 Hybrid'}
                     </span>
                   )}
                   {job.applicationCount > 0 && (
-                    <span style={{ fontSize: 11, padding: '2px 8px', borderRadius: 999, background: '#f0f0ee', color: '#666', border: '1px solid #e8e8e4' }}>
+                    <span
+                      style={{
+                        fontSize: 11,
+                        padding: '2px 8px',
+                        borderRadius: 999,
+                        background: '#f0f0ee',
+                        color: '#666',
+                        border: '1px solid #e8e8e4',
+                      }}
+                    >
                       {job.applicationCount} applicants
                     </span>
                   )}
-                  {job.skills.slice(0, 4).map(s => <span className="tag" key={s}>{s}</span>)}
+                  {job.skills.slice(0, 4).map((s) => (
+                    <span className="tag" key={s}>
+                      {s}
+                    </span>
+                  ))}
                 </div>
 
                 <div style={{ marginTop: 10 }}>
@@ -261,13 +486,35 @@ export default function Jobs() {
 
       {total > 15 && (
         <div style={{ display: 'flex', justifyContent: 'center', gap: 8, marginTop: '1.5rem' }}>
-          <button onClick={() => setPage(p => Math.max(0, p - 1))} disabled={page === 0}
-            style={{ padding: '7px 16px', borderRadius: 8, border: '1px solid #e8e8e4', background: '#fff', fontSize: 13, opacity: page === 0 ? 0.4 : 1 }}>
+          <button
+            onClick={() => setPage((p) => Math.max(0, p - 1))}
+            disabled={page === 0}
+            style={{
+              padding: '7px 16px',
+              borderRadius: 8,
+              border: '1px solid #e8e8e4',
+              background: '#fff',
+              fontSize: 13,
+              opacity: page === 0 ? 0.4 : 1,
+            }}
+          >
             Previous
           </button>
-          <span style={{ fontSize: 13, color: '#888', padding: '7px 8px' }}>Page {page + 1} of {Math.ceil(total / 15)}</span>
-          <button onClick={() => setPage(p => p + 1)} disabled={(page + 1) * 15 >= total}
-            style={{ padding: '7px 16px', borderRadius: 8, border: '1px solid #e8e8e4', background: '#fff', fontSize: 13, opacity: (page + 1) * 15 >= total ? 0.4 : 1 }}>
+          <span style={{ fontSize: 13, color: '#888', padding: '7px 8px' }}>
+            Page {page + 1} of {Math.ceil(total / 15)}
+          </span>
+          <button
+            onClick={() => setPage((p) => p + 1)}
+            disabled={(page + 1) * 15 >= total}
+            style={{
+              padding: '7px 16px',
+              borderRadius: 8,
+              border: '1px solid #e8e8e4',
+              background: '#fff',
+              fontSize: 13,
+              opacity: (page + 1) * 15 >= total ? 0.4 : 1,
+            }}
+          >
             Next
           </button>
         </div>

@@ -116,6 +116,7 @@ Frontend runs on http://localhost:3000, backend on http://localhost:5000.
 ### Final step
 
 Go back to Render → your backend service → Environment variables and update:
+
 - `FRONTEND_URL` = your Vercel URL
 
 ---
@@ -135,16 +136,16 @@ HiremeLeh! — Singapore Internship Tracker               2026
 
 ## Tech stack
 
-| Layer | Technology |
-|-------|-----------|
-| Frontend | React, Chart.js |
-| Backend | Node.js, Express |
-| Database | MongoDB (Mongoose) |
-| Data source | MyCareersFuture public API |
-| Job scheduler | node-cron (syncs every 6h) |
-| Frontend hosting | Vercel (free) |
-| Backend hosting | Render (free) |
-| DB hosting | MongoDB Atlas (free) |
+| Layer            | Technology                 |
+| ---------------- | -------------------------- |
+| Frontend         | React, Chart.js            |
+| Backend          | Node.js, Express           |
+| Database         | MongoDB (Mongoose)         |
+| Data source      | MyCareersFuture public API |
+| Job scheduler    | node-cron (syncs every 6h) |
+| Frontend hosting | Vercel (free)              |
+| Backend hosting  | Render (free)              |
+| DB hosting       | MongoDB Atlas (free)       |
 
 ---
 

@@ -119,8 +119,81 @@
 .loading { text-align: center; color: #aaa; font-size: 13px; padding: 2rem 0; }
 .error { color: #e24b4a; font-size: 13px; padding: 1rem; background: #FCEBEB; border-radius: 8px; }
 
+.ai-bot-shell { display: flex; flex-direction: column; gap: 16px; }
+.ai-bot-hero {
+  background: linear-gradient(135deg, #fcf2df 0%, #f5f5f3 55%, #e7f1fb 100%);
+  border: 1px solid #e8e8e4;
+  border-radius: 16px;
+  padding: 1.5rem;
+}
+.ai-bot-kicker {
+  display: inline-block;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  color: #7a4c12;
+  margin-bottom: 10px;
+}
+.ai-bot-hero h2 { font-size: 28px; margin-bottom: 10px; }
+.ai-bot-hero p { max-width: 640px; font-size: 14px; color: #555; line-height: 1.6; }
+.ai-bot-grid { display: grid; grid-template-columns: 220px 1fr; gap: 14px; }
+.ai-bot-label {
+  display: block;
+  margin-bottom: 8px;
+  font-size: 12px;
+  font-weight: 600;
+  color: #666;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+.ai-bot-actions {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  margin-top: 14px;
+}
+.ai-bot-file-note { font-size: 12px; color: #888; }
+.ai-bot-results { display: grid; grid-template-columns: 220px 1fr 1fr; gap: 16px; }
+.ai-bot-score {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+}
+.ai-bot-score-label {
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: #888;
+}
+.ai-bot-score-value {
+  font-size: 56px;
+  font-weight: 700;
+  line-height: 1;
+  margin: 10px 0 6px;
+  color: #0e5a98;
+}
+.ai-bot-score-sub { font-size: 12px; color: #666; }
+.ai-bot-chip-row { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 14px; }
+.ai-bot-summary { font-size: 13px; color: #555; line-height: 1.6; }
+.ai-bot-fix-list { display: flex; flex-direction: column; gap: 10px; }
+.ai-bot-fix {
+  font-size: 13px;
+  line-height: 1.5;
+  color: #333;
+  padding: 10px 12px;
+  border-radius: 10px;
+  background: #f9f9f7;
+  border: 1px solid #ecebe6;
+}
+
 @media (max-width: 640px) {
   .metric-grid { grid-template-columns: repeat(2, 1fr); }
   .two-col { grid-template-columns: 1fr; }
   .main { padding: 1rem; }
+  .ai-bot-grid { grid-template-columns: 1fr; }
+  .ai-bot-actions { flex-direction: column; align-items: stretch; }
+  .ai-bot-results { grid-template-columns: 1fr; }
 }

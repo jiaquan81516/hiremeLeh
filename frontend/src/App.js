@@ -5,6 +5,7 @@ import SkillGap from './pages/SkillGap';
 import Insights from './pages/Insights';
 import Resources from './pages/Resources';
 import About from './pages/About';
+import AIChatBot from './pages/AIChatBot';
 import { CourseProvider, useCourse } from './CourseContext';
 import { COURSES } from './courseConfig';
 import './App.css';
@@ -14,6 +15,7 @@ const TABS = [
   { id: 'jobs', label: 'Browse jobs' },
   { id: 'gap', label: 'Skill gap' },
   { id: 'insights', label: 'Peer insights' },
+  { id: 'ai', label: 'AI CHAT BOT' },
   { id: 'resources', label: 'Resources' },
   { id: 'about', label: 'About' },
 ];
@@ -76,6 +78,7 @@ function AppInner() {
         {tab === 'jobs' && <Jobs />}
         {tab === 'gap' && <SkillGap />}
         {tab === 'insights' && <Insights />}
+        {tab === 'ai' && <AIChatBot />}
         {tab === 'resources' && <Resources />}
         {tab === 'about' && <About />}
       </main>

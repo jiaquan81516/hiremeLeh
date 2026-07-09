@@ -1,4 +1,4 @@
-const BASE = process.env.REACT_APP_API_URL || '';
+const BASE = process.env.REACT_APP_API_BASE_URL || '';
 
 function cleanParams(params) {
   const cleaned = {};
@@ -44,10 +44,5 @@ export async function submitInsight(data) {
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(data),
   });
-  return res.json();
-}
-
-export async function fetchDeadlines() {
-  const res = await fetch(`${BASE}/api/deadlines`);
   return res.json();
 }

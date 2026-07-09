@@ -9,18 +9,31 @@ const cron = require('node-cron');
 const jobsRouter = require('./routes/jobs');
 const insightsRouter = require('./routes/insights');
 const { syncJobs } = require('./controllers/jobsController');
+const { seedInsights } = require('./controllers/insightsController');
 
 const app = express();
 
+const allowedOrigins = [
+  process.env.FRONTEND_URL,
+  'http://localhost:3000',
+].filter(Boolean);
+
 app.use(cors({
-  origin: process.env.FRONTEND_URL || '*',
+  origin: allowedOrigins,
   methods: ['GET', 'POST'],
+  credentials: true,
 }));
 app.use(express.json());
 
 mongoose.connect(process.env.MONGODB_URI)
   .then(async () => {
     console.log('MongoDB connected');
+    try {
+      await seedInsights();
+    } catch (e) {
+      console.error('Insight seed error:', e.message);
+    }
+
     console.log('Starting initial job sync...');
     try {
       await syncJobs();

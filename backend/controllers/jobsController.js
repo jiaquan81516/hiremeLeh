@@ -750,10 +750,8 @@ async function syncJobs() {
       saved++;
     }
     console.log(`Synced ${saved} unique jobs`);
-    return saved;
   } catch (err) {
     console.error('Job sync failed:', err.message);
-    throw err;
   }
 }
 

@@ -1,12 +1,4 @@
-const isStaticWebApp =
-  typeof window !== 'undefined' && window.location.hostname.endsWith('.azurestaticapps.net');
-
-const BASE = (
-  process.env.REACT_APP_API_BASE_URL ||
-  (isStaticWebApp
-    ? 'https://hiremeleh-api-ahf9bbbkamhuh7hb.southeastasia-01.azurewebsites.net'
-    : '')
-).replace(/\/$/, '');
+const BASE = (process.env.REACT_APP_API_URL || '').replace(/\/$/, '');
 
 function cleanParams(params) {
   const cleaned = {};

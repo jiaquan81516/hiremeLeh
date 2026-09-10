@@ -4,7 +4,7 @@ This document explains the GitLab CI/CD practice setup for HiremeLeh.
 
 ## Purpose
 
-HiremeLeh is currently deployed using GitHub Actions, Azure Static Web Apps, Azure App Service, and MongoDB Atlas.
+HiremeLeh is currently deployed using Netlify, Render, and MongoDB Atlas.
 
 This GitLab CI/CD setup is added for learning and practice. It shows how the same CI/CD concept can be represented in GitLab using a `.gitlab-ci.yml` file.
 
@@ -14,9 +14,8 @@ The GitLab setup should not replace the existing GitHub Actions deployment unles
 
 ```txt
 GitHub
-→ GitHub Actions
-→ Azure Static Web Apps for frontend
-→ Azure App Service for backend
+→ Netlify for frontend
+→ Render for backend
 → MongoDB Atlas
 ```
 
@@ -56,7 +55,7 @@ This stage:
 The frontend uses this GitLab CI/CD variable:
 
 ```txt
-REACT_APP_API_BASE_URL
+REACT_APP_API_URL
 ```
 
 ### 3. deploy_preview
@@ -65,7 +64,7 @@ The deployment jobs are manual preview jobs.
 
 They do not deploy automatically.
 
-They explain where Azure deployment would happen if GitLab CI/CD were used as the main CI/CD platform.
+They explain where Netlify and Render deployment would happen if GitLab CI/CD were used as the main CI/CD platform.
 
 ## Required GitLab CI/CD Variables
 
@@ -78,12 +77,12 @@ Settings → CI/CD → Variables
 Required variables:
 
 ```txt
-AZURE_WEBAPP_PUBLISH_PROFILE
-AZURE_STATIC_WEB_APPS_API_TOKEN
-REACT_APP_API_BASE_URL
+RENDER_DEPLOY_HOOK_URL
+NETLIFY_AUTH_TOKEN
+REACT_APP_API_URL
 ```
 
-Possible backend runtime variables should still be stored in Azure App Service App Settings:
+Possible backend runtime variables should still be stored in Render environment variables:
 
 ```txt
 MONGO_URI
@@ -102,12 +101,12 @@ Do not commit:
 .env.production
 MongoDB connection strings
 JWT secrets
-Azure publish profiles
-Azure deployment tokens
+Render deploy hooks
+Netlify access tokens
 *.PublishSettings
 ```
 
-Secrets should be stored in GitLab CI/CD Variables, GitHub Secrets, or Azure App Service App Settings depending on the deployment platform.
+Secrets should be stored in GitLab CI/CD Variables, GitHub Secrets, Netlify environment variables, or Render environment variables depending on the deployment platform.
 
 ## GitHub Actions vs GitLab CI/CD
 
@@ -187,7 +186,7 @@ For GitLab CI/CD practice branch:
 git push -u gitlab devops/gitlab-cicd-practice
 ```
 
-Do not replace `origin` with GitLab because GitHub Actions is still the real Azure deployment path.
+Do not replace `origin` with GitLab because GitHub remains the main source repository.
 
 ## Why This Was Added
 

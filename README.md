@@ -99,25 +99,29 @@ Frontend runs on http://localhost:3000, backend on http://localhost:5000.
    - **Environment**: Node
 5. Add environment variables:
    - `MONGODB_URI` = your Atlas connection string
-   - `FRONTEND_URL` = your Vercel frontend URL (add after deploying frontend)
+   - `FRONTEND_URL` = your Netlify frontend URL (add after deploying frontend)
 6. Deploy — you'll get a URL like `https://hiremeLeh-backend.onrender.com`
 
 > Note: Render free tier spins down after 15 mins inactivity. First request after sleep takes ~30s.
 
-### Frontend → Vercel
+### Frontend → Netlify
 
-1. Go to [vercel.com](https://vercel.com) and sign up free
-2. Click **New Project** and import your GitHub repo
-3. Set root directory to `frontend`
-4. Add environment variable:
+1. Go to [netlify.com](https://netlify.com) and sign up free
+2. Click **Add new site → Import an existing project**
+3. Import your GitHub repo
+4. Netlify will use `netlify.toml` from the repo root:
+   - **Base directory**: `frontend`
+   - **Build command**: `npm run build`
+   - **Publish directory**: `frontend/build`
+5. Add environment variable:
    - `REACT_APP_API_URL` = your Render backend URL (e.g. `https://hiremeLeh-backend.onrender.com`)
-5. Deploy — you'll get a URL like `https://hiremeLeh.vercel.app`
+6. Deploy — you'll get a URL like `https://hiremeleh.netlify.app`
 
 ### Final step
 
 Go back to Render → your backend service → Environment variables and update:
 
-- `FRONTEND_URL` = your Vercel URL
+- `FRONTEND_URL` = your Netlify URL
 
 ---
 
@@ -129,7 +133,7 @@ HiremeLeh! — Singapore Internship Tracker               2026
   to aggregate and analyze 1,000+ live tech job postings from MyCareersFuture API
 - Implemented a skill gap analyzer that matches users' skills against real-time
   hiring trends across Singapore's top tech companies
-- Deployed on Vercel (frontend) and Render (backend) with MongoDB Atlas — $0 cost
+- Deployed on Netlify (frontend) and Render (backend) with MongoDB Atlas — $0 cost
 ```
 
 ---
@@ -143,7 +147,7 @@ HiremeLeh! — Singapore Internship Tracker               2026
 | Database         | MongoDB (Mongoose)         |
 | Data source      | MyCareersFuture public API |
 | Job scheduler    | node-cron (syncs every 6h) |
-| Frontend hosting | Vercel (free)              |
+| Frontend hosting | Netlify (free)             |
 | Backend hosting  | Render (free)              |
 | DB hosting       | MongoDB Atlas (free)       |
 

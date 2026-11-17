@@ -10,75 +10,76 @@ import { CourseProvider, useCourse } from './CourseContext';
 import { COURSES } from './courseConfig';
 import './App.css';
 
+// The nav is drawn like an MRT route map: one line, one stop per page.
 const TABS = [
-  { id: 'trends', label: 'Trends' },
-  { id: 'jobs', label: 'Browse jobs' },
-  { id: 'gap', label: 'Skill gap' },
-  { id: 'insights', label: 'Peer insights' },
-  { id: 'ai', label: 'AI CHAT BOT' },
-  { id: 'resources', label: 'Resources' },
-  { id: 'about', label: 'About' },
+  { id: 'trends', label: 'Home', short: 'Home' },
+  { id: 'jobs', label: 'Browse jobs', short: 'Jobs' },
+  { id: 'gap', label: 'Skill gap', short: 'Skills' },
+  { id: 'insights', label: 'Peer insights', short: 'Peers' },
+  { id: 'ai', label: 'AI chat bot', short: 'AI' },
+  { id: 'resources', label: 'Resources', short: 'Guides' },
+  { id: 'about', label: 'About', short: 'About' },
 ];
 
 function CourseSelector() {
   const { course, setCourse } = useCourse();
   return (
-    <select
-      value={course}
-      onChange={(e) => setCourse(e.target.value)}
-      style={{
-        padding: '5px 10px',
-        borderRadius: 999,
-        border: '1px solid #e8e8e4',
-        fontSize: 12,
-        fontWeight: 500,
-        background: '#f5f5f3',
-        color: '#1a1a1a',
-        cursor: 'pointer',
-      }}
-    >
-      {Object.entries(COURSES).map(([key, val]) => (
-        <option key={key} value={key}>
-          {val.label}
-        </option>
-      ))}
-    </select>
+    <label className="course-select">
+      <span className="course-select-label">I study</span>
+      <select
+        value={course}
+        onChange={(e) => setCourse(e.target.value)}
+        aria-label="Choose your course"
+      >
+        {Object.entries(COURSES).map(([key, val]) => (
+          <option key={key} value={key}>
+            {val.label}
+          </option>
+        ))}
+      </select>
+    </label>
   );
 }
 
 function AppInner() {
   const [tab, setTab] = useState('trends');
+  const { course } = useCourse();
+
+  const go = (id) => {
+    setTab(id);
+    window.scrollTo(0, 0);
+  };
 
   return (
-    <div className="app-shell">
-      <header className="header">
-        <div className="header-inner">
-          <div className="logo">
-            HiremeLeh<span className="logo-accent">!</span>
-          </div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-            <CourseSelector />
-            <div className="live-badge">Live · MyCareersFuture</div>
-          </div>
+    <div className="shell" data-track={course}>
+      <header className="topbar">
+        <div className="topbar-inner">
+          <button className="wordmark" onClick={() => go('trends')} aria-label="HiremeLeh home">
+            HiremeLeh<span>!</span>
+          </button>
+          <CourseSelector />
         </div>
       </header>
 
-      <nav className="nav">
-        <div className="nav-inner">
+      <nav className="route" aria-label="Pages">
+        <div className="route-inner" style={{ '--n': TABS.length }}>
           {TABS.map((t) => (
             <button
               key={t.id}
-              className={`nav-btn ${tab === t.id ? 'active' : ''}`}
-              onClick={() => setTab(t.id)}
+              className={`stop ${tab === t.id ? 'active' : ''}`}
+              onClick={() => go(t.id)}
+              aria-current={tab === t.id ? 'page' : undefined}
             >
-              {t.label}
+              <span className="stop-dot" />
+              <span className="stop-label stop-long">{t.label}</span>
+              <span className="stop-label stop-short">{t.short}</span>
             </button>
           ))}
         </div>
       </nav>
 
       <main className="main">
-        {tab === 'trends' && <Trends />}
+        {tab === 'trends' && <Trends goTo={go} />}
         {tab === 'jobs' && <Jobs />}
         {tab === 'gap' && <SkillGap />}
         {tab === 'insights' && <Insights />}
@@ -88,7 +89,8 @@ function AppInner() {
       </main>
 
       <footer className="footer">
-        Built by Foo Jia Quan · Data from MyCareersFuture (Singapore)
+        <div>Built by Foo Jia Quan, SMU Year 1 IS</div>
+        <div>Jobs from MyCareersFuture · refreshed every 6 hours · where got time one leh</div>
       </footer>
     </div>
   );

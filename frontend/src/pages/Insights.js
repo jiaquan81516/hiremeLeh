@@ -24,27 +24,30 @@ const ROLES = [
 ];
 const UNIS = ['SMU', 'NUS', 'NTU', 'SIT', 'SUSS', 'Other'];
 const YEARS = ['Year 1', 'Year 2', 'Year 3', 'Year 4', 'Fresh grad'];
+const EMPTY = {
+  company: '',
+  role: '',
+  salary: '',
+  interviewFormat: '',
+  advice: '',
+  university: '',
+  year: '',
+};
 
 export default function Insights() {
   const [tab, setTab] = useState('read');
   const [insights, setInsights] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState(false);
   const [submitted, setSubmitted] = useState(false);
   const [submitting, setSubmitting] = useState(false);
-  const [form, setForm] = useState({
-    company: '',
-    role: '',
-    salary: '',
-    interviewFormat: '',
-    advice: '',
-    university: '',
-    year: '',
-  });
+  const [formError, setFormError] = useState('');
+  const [form, setForm] = useState(EMPTY);
 
   useEffect(() => {
     fetchInsights()
-      .then(setInsights)
-      .catch(console.error)
+      .then((d) => setInsights(Array.isArray(d) ? d : []))
+      .catch(() => setLoadError(true))
       .finally(() => setLoading(false));
   }, []);
 
@@ -52,29 +55,22 @@ export default function Insights() {
 
   const handleSubmit = async () => {
     if (!form.company || !form.role || !form.interviewFormat || !form.advice) {
-      alert('Please fill in company, role, interview format, and advice.');
+      setFormError('Please fill in company, role, interview format and advice.');
       return;
     }
+    setFormError('');
     setSubmitting(true);
     try {
       const newInsight = await submitInsight(form);
       setInsights((prev) => [newInsight, ...prev]);
       setSubmitted(true);
-      setForm({
-        company: '',
-        role: '',
-        salary: '',
-        interviewFormat: '',
-        advice: '',
-        university: '',
-        year: '',
-      });
+      setForm(EMPTY);
       setTimeout(() => {
         setTab('read');
         setSubmitted(false);
       }, 2000);
     } catch (e) {
-      alert('Submission failed. Please try again.');
+      setFormError('Submission failed. Please try again.');
     } finally {
       setSubmitting(false);
     }
@@ -82,16 +78,25 @@ export default function Insights() {
 
   return (
     <div>
-      <div className="tab-row">
+      <h1 className="page-title">Peer insights</h1>
+      <p className="page-sub">
+        Real pay and interview formats from students who went through it. Anonymous and honest.
+      </p>
+
+      <div className="segment" role="tablist">
         <button
-          className={`tab-btn ${tab === 'read' ? 'active' : ''}`}
+          className={tab === 'read' ? 'on' : ''}
           onClick={() => setTab('read')}
+          role="tab"
+          aria-selected={tab === 'read'}
         >
           Read insights
         </button>
         <button
-          className={`tab-btn ${tab === 'share' ? 'active' : ''}`}
+          className={tab === 'share' ? 'on' : ''}
           onClick={() => setTab('share')}
+          role="tab"
+          aria-selected={tab === 'share'}
         >
           Share yours
         </button>
@@ -99,45 +104,56 @@ export default function Insights() {
 
       {tab === 'read' && (
         <div>
-          <p className="section-sub">
-            Anonymous salary and interview insights from students like you.
-          </p>
-          {loading && <div className="loading">Loading insights...</div>}
-          {!loading && insights.length === 0 && (
-            <div className="empty">No insights yet — be the first to share!</div>
+          {loading && (
+            <div className="skel" style={{ height: 180, borderRadius: 16 }} aria-busy="true" />
           )}
-          {insights.map((ins) => (
-            <div className="insight-card" key={ins._id}>
-              <div className="insight-top">
-                <div>
-                  <div className="insight-company">{ins.company}</div>
-                  <div className="insight-meta">
-                    {ins.role}
-                    {ins.university && ` · ${ins.university}`}
-                    {ins.year && ` ${ins.year}`}
-                  </div>
-                </div>
-                {ins.salary && <div className="insight-salary">{ins.salary}</div>}
-              </div>
-              <div className="insight-label">Interview format</div>
-              <div className="insight-text">{ins.interviewFormat}</div>
-              <div className="insight-label">Advice</div>
-              <div className="insight-text">{ins.advice}</div>
+          {loadError && (
+            <div className="error">
+              Could not load insights. The free server may be waking up, try again in a bit.
             </div>
-          ))}
+          )}
+          {!loading && !loadError && insights.length === 0 && (
+            <div className="empty">
+              <strong>No insights yet</strong>Be the first to share, it takes 2 minutes.
+            </div>
+          )}
+          <div className="notes">
+            {insights.map((ins) => (
+              <article className="note" key={ins._id || `${ins.company}-${ins.advice}`}>
+                <div className="note-top">
+                  <div>
+                    <div className="note-co">{ins.company}</div>
+                    <div className="note-meta">
+                      {ins.role}
+                      {ins.university && ` · ${ins.university}`}
+                      {ins.year && ` ${ins.year}`}
+                    </div>
+                  </div>
+                  {ins.salary && <div className="note-pay">{ins.salary}</div>}
+                </div>
+                <h5>Interview format</h5>
+                <p>{ins.interviewFormat}</p>
+                <h5>Advice</h5>
+                <p>{ins.advice}</p>
+              </article>
+            ))}
+          </div>
         </div>
       )}
 
       {tab === 'share' && (
-        <div>
-          <p className="section-sub">
-            Help fellow students by sharing your experience. 100% anonymous.
-          </p>
-          {submitted && <div className="success-msg">Thanks! Your insight has been shared.</div>}
-          <div className="card">
-            <div className="form-group">
-              <select name="company" value={form.company} onChange={handleChange}>
-                <option value="">Select company *</option>
+        <div className="card" style={{ maxWidth: 600 }}>
+          {submitted && <div className="ok">Thanks! Your insight is up.</div>}
+          {formError && <div className="error">{formError}</div>}
+          <div className="form">
+            <div className="field">
+              <select
+                name="company"
+                value={form.company}
+                onChange={handleChange}
+                aria-label="Company"
+              >
+                <option value="">Company *</option>
                 {COMPANIES.map((c) => (
                   <option key={c} value={c}>
                     {c}
@@ -145,9 +161,9 @@ export default function Insights() {
                 ))}
               </select>
             </div>
-            <div className="form-group">
-              <select name="role" value={form.role} onChange={handleChange}>
-                <option value="">Select role type *</option>
+            <div className="field">
+              <select name="role" value={form.role} onChange={handleChange} aria-label="Role type">
+                <option value="">Role type *</option>
                 {ROLES.map((r) => (
                   <option key={r} value={r}>
                     {r}
@@ -155,28 +171,21 @@ export default function Insights() {
                 ))}
               </select>
             </div>
-            <div className="form-group">
+            <div className="field">
               <input
                 type="text"
                 name="salary"
-                placeholder="Monthly salary e.g. $1,400/mo (optional)"
+                placeholder="Monthly pay, e.g. $1,400/mo (optional)"
                 value={form.salary}
                 onChange={handleChange}
               />
             </div>
-            <div
-              style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8, marginBottom: 10 }}
-            >
+            <div className="field-2 field">
               <select
                 name="university"
                 value={form.university}
                 onChange={handleChange}
-                style={{
-                  padding: '9px 14px',
-                  borderRadius: 8,
-                  border: '1px solid #e8e8e4',
-                  fontSize: 13,
-                }}
+                aria-label="University"
               >
                 <option value="">University (optional)</option>
                 {UNIS.map((u) => (
@@ -189,14 +198,9 @@ export default function Insights() {
                 name="year"
                 value={form.year}
                 onChange={handleChange}
-                style={{
-                  padding: '9px 14px',
-                  borderRadius: 8,
-                  border: '1px solid #e8e8e4',
-                  fontSize: 13,
-                }}
+                aria-label="Year of study"
               >
-                <option value="">Year of study (optional)</option>
+                <option value="">Year (optional)</option>
                 {YEARS.map((y) => (
                   <option key={y} value={y}>
                     {y}
@@ -204,25 +208,25 @@ export default function Insights() {
                 ))}
               </select>
             </div>
-            <div className="form-group">
+            <div className="field">
               <textarea
                 name="interviewFormat"
-                placeholder="Describe the interview format — how many rounds, what types of questions? *"
+                rows={3}
                 value={form.interviewFormat}
                 onChange={handleChange}
-                rows={3}
+                placeholder="How was the interview? How many rounds, what kind of questions? *"
               />
             </div>
-            <div className="form-group">
+            <div className="field">
               <textarea
                 name="advice"
-                placeholder="Any advice for other students applying to this company? *"
+                rows={3}
                 value={form.advice}
                 onChange={handleChange}
-                rows={3}
+                placeholder="Any advice for the next student applying? *"
               />
             </div>
-            <button className="submit-btn" onClick={handleSubmit} disabled={submitting}>
+            <button className="btn brand" onClick={handleSubmit} disabled={submitting}>
               {submitting ? 'Submitting...' : 'Submit anonymously'}
             </button>
           </div>

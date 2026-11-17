@@ -3,8 +3,33 @@ import { fetchTrends } from '../api';
 import { useCourse } from '../CourseContext';
 import { COURSES } from '../courseConfig';
 
-export default function Trends() {
-  const { course } = useCourse();
+function BarRows({ rows, hotAt }) {
+  const max = rows[0]?.value || 1;
+  return rows.map((r, i) => {
+    const level = hotAt(r, max);
+    return (
+      <div className="bar-row" key={r.name}>
+        <span className="bar-rank">{i + 1}</span>
+        <span className="bar-name" title={r.name}>
+          {r.name}
+        </span>
+        <div className="bar-track">
+          <div
+            className={`bar-fill ${level}`}
+            style={{
+              width: `${Math.max(3, Math.round((r.value / max) * 100))}%`,
+              animationDelay: `${i * 40}ms`,
+            }}
+          />
+        </div>
+        <span className="bar-val">{r.label}</span>
+      </div>
+    );
+  });
+}
+
+export default function Trends({ goTo }) {
+  const { course, setCourse } = useCourse();
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -18,86 +43,108 @@ export default function Trends() {
       .finally(() => setLoading(false));
   }, [course]);
 
-  if (loading) return <div className="loading">Loading trends for {COURSES[course]?.label}...</div>;
-  if (error) return <div className="error">Could not load trends: {error}</div>;
-  if (!data) return null;
-
-  const maxSkill = data.topSkills?.[0]?.count || 1;
-  const maxCompany = data.topCompanies?.[0]?.count || 1;
+  const label = COURSES[course]?.label;
+  const skillRows = (data?.topSkills || []).map((s) => ({
+    name: s.skill,
+    value: s.count,
+    pct: s.pct,
+    label: `${s.pct}%`,
+  }));
+  const companyRows = (data?.topCompanies || []).map((c) => ({
+    name: c.company,
+    value: c.count,
+    label: String(c.count),
+  }));
 
   return (
     <div>
-      <div style={{ marginBottom: '1rem', display: 'flex', alignItems: 'center', gap: 8 }}>
-        <span style={{ fontSize: 13, color: '#888' }}>Showing data for</span>
-        <span style={{ fontSize: 13, fontWeight: 600, color: '#1a1a1a' }}>
-          {COURSES[course]?.label}
-        </span>
-      </div>
+      <section className="hero">
+        <div className="hero-kicker">Singapore internships, no need to scroll 10 sites</div>
+        <div className="hero-num">
+          {loading || !data ? <span className="skel" /> : data.totalJobs?.toLocaleString()}
+        </div>
+        <div className="hero-line">
+          roles open for {label} students right now. Refreshed every 6 hours.
+        </div>
+        <div className="hero-picker-label">Which course are you?</div>
+        <div className="hero-picker" role="group" aria-label="Choose your course">
+          {Object.entries(COURSES).map(([key, val]) => (
+            <button
+              key={key}
+              className={`pick ${course === key ? 'on' : ''}`}
+              onClick={() => setCourse(key)}
+            >
+              {val.label}
+            </button>
+          ))}
+        </div>
+        <div className="hero-cta">
+          <button className="btn" onClick={() => goTo && goTo('jobs')}>
+            See the jobs
+          </button>
+          <button className="btn ghost" onClick={() => goTo && goTo('gap')}>
+            Check my skill gap
+          </button>
+        </div>
+      </section>
 
-      <div className="metric-grid">
-        <div className="metric">
-          <div className="metric-label">Live postings</div>
-          <div className="metric-value">{data.totalJobs?.toLocaleString()}</div>
-          <div className="metric-sub">roles in SG</div>
+      {error && (
+        <div className="error">
+          Could not load trends ({error}). The free server may be waking up, give it about 30
+          seconds.
         </div>
-        <div className="metric">
-          <div className="metric-label">Avg entry salary</div>
-          <div className="metric-value">${data.avgSalary?.toLocaleString() || '—'}</div>
-          <div className="metric-sub">per month</div>
-        </div>
-        <div className="metric">
-          <div className="metric-label">Hottest skill</div>
-          <div className="metric-value" style={{ fontSize: 16 }}>
-            {data.topSkills?.[0]?.skill || '—'}
+      )}
+
+      {data && !error && (
+        <>
+          <div className="stats">
+            <div className="stat">
+              <div className="stat-label">Avg entry salary</div>
+              <div className="stat-value">
+                {data.avgSalary ? `$${data.avgSalary.toLocaleString()}` : '—'}
+              </div>
+              <div className="stat-sub">per month, excluding internships</div>
+            </div>
+            <div className="stat">
+              <div className="stat-label">Internships</div>
+              <div className="stat-value">
+                {data.internships?.toLocaleString?.() ?? data.internships}
+              </div>
+              <div className="stat-sub">open right now</div>
+            </div>
+            <div className="stat">
+              <div className="stat-label">Hottest skill</div>
+              <div className="stat-value" style={{ textTransform: 'capitalize' }}>
+                {data.topSkills?.[0]?.skill || '—'}
+              </div>
+              <div className="stat-sub">asked for the most</div>
+            </div>
           </div>
-          <div className="metric-sub">most in-demand</div>
-        </div>
-        <div className="metric">
-          <div className="metric-label">Internships</div>
-          <div className="metric-value">{data.internships}</div>
-          <div className="metric-sub">open right now</div>
-        </div>
-      </div>
 
-      <div className="two-col">
-        <div className="card">
-          <h3>Most in-demand skills</h3>
-          {data.topSkills?.length === 0 && (
-            <div className="empty">No skill data yet for this track.</div>
-          )}
-          {data.topSkills?.map(({ skill, count, pct }) => (
-            <div className="skill-bar-row" key={skill}>
-              <span className="skill-name">{skill}</span>
-              <div className="bar-track">
-                <div
-                  className={`bar-fill ${pct > 70 ? 'hot' : pct > 50 ? 'warm' : ''}`}
-                  style={{ width: `${Math.round((count / maxSkill) * 100)}%` }}
-                />
-              </div>
-              <span className="skill-pct">{pct}%</span>
+          <div className="two-col" key={course}>
+            <div className="card">
+              <h3>What employers keep asking for</h3>
+              {skillRows.length === 0 && (
+                <div className="empty">No skill data for this track yet.</div>
+              )}
+              <BarRows
+                rows={skillRows}
+                hotAt={(r) => (r.pct > 70 ? 'hot' : r.pct > 50 ? 'warm' : '')}
+              />
             </div>
-          ))}
-        </div>
-
-        <div className="card">
-          <h3>Top hiring companies</h3>
-          {data.topCompanies?.length === 0 && (
-            <div className="empty">No company data yet for this track.</div>
-          )}
-          {data.topCompanies?.map(({ company, count }) => (
-            <div className="skill-bar-row" key={company}>
-              <span className="skill-name">{company}</span>
-              <div className="bar-track">
-                <div
-                  className={`bar-fill ${count === maxCompany ? 'hot' : count > maxCompany * 0.6 ? 'warm' : ''}`}
-                  style={{ width: `${Math.round((count / maxCompany) * 100)}%` }}
-                />
-              </div>
-              <span className="skill-pct">{count}</span>
+            <div className="card">
+              <h3>Who is hiring the most</h3>
+              {companyRows.length === 0 && (
+                <div className="empty">No company data for this track yet.</div>
+              )}
+              <BarRows
+                rows={companyRows}
+                hotAt={(r, max) => (r.value === max ? 'hot' : r.value > max * 0.6 ? 'warm' : '')}
+              />
             </div>
-          ))}
-        </div>
-      </div>
+          </div>
+        </>
+      )}
     </div>
   );
 }

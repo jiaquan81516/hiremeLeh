@@ -18,6 +18,7 @@ function cleanParams(params) {
 
 export async function fetchTrends(course = 'all') {
   const res = await fetch(`${BASE}/api/jobs/trends?course=${course}`);
+  if (!res.ok) throw new Error(`Server error: ${res.status}`);
   return res.json();
 }
 
@@ -30,6 +31,7 @@ export async function fetchJobs(params = {}) {
 
 export async function fetchTopSkills(course = 'all') {
   const res = await fetch(`${BASE}/api/jobs/topskills?course=${course}`);
+  if (!res.ok) throw new Error(`Server error: ${res.status}`);
   return res.json();
 }
 
@@ -37,12 +39,14 @@ export async function fetchSkillGap(skills, course = 'all') {
   const res = await fetch(
     `${BASE}/api/jobs/skillgap?skills=${encodeURIComponent(skills.join(','))}&course=${course}`
   );
+  if (!res.ok) throw new Error(`Server error: ${res.status}`);
   return res.json();
 }
 
 export async function fetchInsights(company = '') {
   const qs = company ? `?company=${encodeURIComponent(company)}` : '';
   const res = await fetch(`${BASE}/api/insights${qs}`);
+  if (!res.ok) throw new Error(`Server error: ${res.status}`);
   return res.json();
 }
 
@@ -52,5 +56,6 @@ export async function submitInsight(data) {
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(data),
   });
+  if (!res.ok) throw new Error(`Server error: ${res.status}`);
   return res.json();
 }

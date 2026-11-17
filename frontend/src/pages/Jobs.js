@@ -3,28 +3,39 @@ import { fetchJobs } from '../api';
 import { useCourse } from '../CourseContext';
 import { COURSES } from '../courseConfig';
 
+const PAGE_SIZE = 15;
+const SAVED_KEY = 'hiremeLeh_saved';
+
 const SORT_OPTIONS = [
   { value: 'recent', label: 'Most recent' },
   { value: 'leastApplicants', label: 'Least applicants' },
-  { value: 'salaryHigh', label: 'Salary: High to low' },
-  { value: 'salaryLow', label: 'Salary: Low to high' },
+  { value: 'salaryHigh', label: 'Salary: high to low' },
+  { value: 'salaryLow', label: 'Salary: low to high' },
   { value: 'closingSoon', label: 'Closing soon' },
 ];
 
 const COMPANY_SIZES = [
-  { value: '', label: 'Any company' },
-  { value: 'government', label: '🏛 Government' },
-  { value: 'mnc', label: '🌐 MNC' },
-  { value: 'sme', label: '🏢 SME' },
-  { value: 'startup', label: '🚀 Startup' },
+  { value: 'government', label: 'Government' },
+  { value: 'mnc', label: 'MNC' },
+  { value: 'sme', label: 'SME' },
+  { value: 'startup', label: 'Startup' },
 ];
 
 const WORK_ARRANGEMENTS = [
-  { value: '', label: 'Any arrangement' },
-  { value: 'remote', label: '🏠 Remote' },
-  { value: 'hybrid', label: '🔄 Hybrid' },
-  { value: 'onsite', label: '🏢 On-site' },
+  { value: 'remote', label: 'Remote' },
+  { value: 'hybrid', label: 'Hybrid' },
+  { value: 'onsite', label: 'On-site' },
 ];
+
+const SIZE_LABEL = { government: 'Government', mnc: 'MNC', sme: 'SME', startup: 'Startup' };
+
+const TILE_COLOURS = ['#d90f29', '#005ec4', '#0a8f4e', '#7a2fb5', '#c96a00', '#10141f', '#0b7c8a'];
+
+function tileColour(name = '') {
+  let h = 0;
+  for (let i = 0; i < name.length; i++) h = (h * 31 + name.charCodeAt(i)) >>> 0;
+  return TILE_COLOURS[h % TILE_COLOURS.length];
+}
 
 function daysUntilClose(date) {
   if (!date) return null;
@@ -35,11 +46,104 @@ function daysUntilClose(date) {
 function timeAgo(date) {
   if (!date) return '';
   const days = Math.floor((new Date() - new Date(date)) / (1000 * 60 * 60 * 24));
-  if (days === 0) return 'Today';
-  if (days === 1) return 'Yesterday';
-  if (days < 7) return `${days}d ago`;
-  if (days < 30) return `${Math.floor(days / 7)}w ago`;
-  return `${Math.floor(days / 30)}mo ago`;
+  if (days <= 0) return 'Posted today';
+  if (days === 1) return 'Posted yesterday';
+  if (days < 7) return `Posted ${days}d ago`;
+  if (days < 30) return `Posted ${Math.floor(days / 7)}w ago`;
+  return `Posted ${Math.floor(days / 30)}mo ago`;
+}
+
+function readSaved() {
+  try {
+    return JSON.parse(localStorage.getItem(SAVED_KEY)) || {};
+  } catch {
+    return {};
+  }
+}
+
+function BookmarkIcon() {
+  return (
+    <svg viewBox="0 0 24 24" aria-hidden="true">
+      <path d="M6 3h12v18l-6-4.5L6 21z" />
+    </svg>
+  );
+}
+
+function JobCard({ job, saved, onToggle }) {
+  const daysLeft = daysUntilClose(job.closingAt);
+  const isUrgent = daysLeft !== null && daysLeft <= 7;
+  const isNew = job.postedAt && new Date() - new Date(job.postedAt) < 48 * 60 * 60 * 1000;
+  const isHidden = isNew && job.applicationCount < 10;
+  const stated = job.salary?.display && job.salary.display !== 'Not stated';
+  const kind = isHidden ? 'gem' : isUrgent ? 'urgent' : isNew ? 'fresh' : '';
+
+  return (
+    <article className={`job ${kind}`}>
+      <div className="job-head">
+        <div className="tile" style={{ background: tileColour(job.company) }} aria-hidden="true">
+          {(job.company || '?').trim().charAt(0).toUpperCase()}
+        </div>
+        <div>
+          <h3 className="job-title">{job.title}</h3>
+          <div className="job-company">{job.company}</div>
+        </div>
+        <div className="job-pay">
+          <div className={`job-salary ${stated ? '' : 'none'}`}>
+            {stated ? job.salary.display : 'Salary not stated'}
+          </div>
+          {stated && <div className="job-per">per month</div>}
+        </div>
+      </div>
+
+      {(isHidden || isUrgent || (isNew && !isHidden)) && (
+        <div className="ribbons">
+          {isHidden && <span className="ribbon gem">Hidden gem</span>}
+          {isUrgent && <span className="ribbon urgent">Closes in {daysLeft}d</span>}
+          {isNew && !isHidden && <span className="ribbon fresh">New</span>}
+        </div>
+      )}
+
+      <div className="facts">
+        <span>{timeAgo(job.postedAt)}</span>
+        {job.applicationCount > 0 && (
+          <span>
+            <b>{job.applicationCount}</b> applicants
+          </span>
+        )}
+        {job.companySize && job.companySize !== 'unknown' && (
+          <span>{SIZE_LABEL[job.companySize] || job.companySize}</span>
+        )}
+        {job.workArrangement && job.workArrangement !== 'onsite' && (
+          <span style={{ textTransform: 'capitalize' }}>{job.workArrangement}</span>
+        )}
+      </div>
+
+      {job.skills?.length > 0 && (
+        <div className="skills">
+          {job.skills.slice(0, 4).map((s) => (
+            <span className="skill-tag" key={s}>
+              {s}
+            </span>
+          ))}
+        </div>
+      )}
+
+      <div className="job-foot">
+        <a className="btn" href={job.url} target="_blank" rel="noopener noreferrer">
+          View on MyCareersFuture
+        </a>
+        <button
+          className={`save ${saved ? 'on' : ''}`}
+          onClick={() => onToggle(job)}
+          aria-pressed={saved}
+          aria-label={saved ? 'Remove from saved' : 'Save this job'}
+          title={saved ? 'Saved' : 'Save for later'}
+        >
+          <BookmarkIcon />
+        </button>
+      </div>
+    </article>
+  );
 }
 
 export default function Jobs() {
@@ -48,7 +152,9 @@ export default function Jobs() {
   const [total, setTotal] = useState(0);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [showFilters, setShowFilters] = useState(false);
+  const [open, setOpen] = useState(false);
+  const [saved, setSaved] = useState(readSaved);
+  const [showSaved, setShowSaved] = useState(false);
 
   // Filters
   const [search, setSearch] = useState('');
@@ -64,7 +170,8 @@ export default function Jobs() {
 
   const load = useCallback(() => {
     setLoading(true);
-    const params = { course, sortBy, page, limit: 15 };
+    setError(null);
+    const params = { course, sortBy, page, limit: PAGE_SIZE };
     if (search) params.search = search;
     if (internOnly) params.internship = true;
     if (companySize) params.companySize = companySize;
@@ -101,419 +208,332 @@ export default function Jobs() {
     load();
   }, [load]);
 
-  const activeFilterCount = [
-    internOnly,
-    companySize,
-    workArrangement,
-    hiddenGems,
-    closingSoon,
-    salaryMin,
-    salaryMax,
-  ].filter(Boolean).length;
+  const toggleSaved = (job) => {
+    setSaved((prev) => {
+      const next = { ...prev };
+      if (next[job._id]) delete next[job._id];
+      else next[job._id] = { ...job, savedAt: Date.now() };
+      try {
+        localStorage.setItem(SAVED_KEY, JSON.stringify(next));
+      } catch {}
+      return next;
+    });
+  };
+
+  const savedList = Object.values(saved).sort((a, b) => b.savedAt - a.savedAt);
+  const savedCount = savedList.length;
+
+  const reset = () => setPage(0);
+  const chips = [];
+  if (internOnly)
+    chips.push({ key: 'intern', label: 'Internships', clear: () => setInternOnly(false) });
+  if (hiddenGems)
+    chips.push({ key: 'gems', label: 'Hidden gems', clear: () => setHiddenGems(false) });
+  if (closingSoon)
+    chips.push({ key: 'closing', label: 'Closing soon', clear: () => setClosingSoon(false) });
+  if (companySize)
+    chips.push({
+      key: 'size',
+      label: COMPANY_SIZES.find((c) => c.value === companySize)?.label,
+      clear: () => setCompanySize(''),
+    });
+  if (workArrangement)
+    chips.push({
+      key: 'work',
+      label: WORK_ARRANGEMENTS.find((c) => c.value === workArrangement)?.label,
+      clear: () => setWorkArrangement(''),
+    });
+  if (salaryMin || salaryMax) {
+    chips.push({
+      key: 'sal',
+      label: `$${salaryMin || 0} to ${salaryMax ? '$' + salaryMax : 'any'}`,
+      clear: () => {
+        setSalaryMin('');
+        setSalaryMax('');
+      },
+    });
+  }
+
+  const clearAll = () => {
+    setInternOnly(false);
+    setHiddenGems(false);
+    setClosingSoon(false);
+    setCompanySize('');
+    setWorkArrangement('');
+    setSalaryMin('');
+    setSalaryMax('');
+    setSearch('');
+    reset();
+  };
+
+  const goPage = (p) => {
+    setPage(p);
+    window.scrollTo({ top: 0 });
+  };
+
+  const visible = showSaved ? savedList : jobs;
+  const courseLabel = COURSES[course]?.label;
 
   return (
     <div>
-      {/* Search + Sort row */}
-      <div style={{ display: 'flex', gap: 8, marginBottom: 10, flexWrap: 'wrap' }}>
-        <input
-          type="text"
-          placeholder={`Search ${COURSES[course]?.label} roles...`}
-          value={search}
-          onChange={(e) => {
-            setSearch(e.target.value);
-            setPage(0);
-          }}
-          style={{
-            flex: 1,
-            minWidth: 200,
-            padding: '9px 14px',
-            borderRadius: 8,
-            border: '1px solid #e8e8e4',
-            fontSize: 13,
-          }}
-        />
-        <select
-          value={sortBy}
-          onChange={(e) => {
-            setSortBy(e.target.value);
-            setPage(0);
-          }}
-          style={{
-            padding: '9px 14px',
-            borderRadius: 8,
-            border: '1px solid #e8e8e4',
-            fontSize: 13,
-            background: '#fff',
-          }}
-        >
-          {SORT_OPTIONS.map((o) => (
-            <option key={o.value} value={o.value}>
-              {o.label}
-            </option>
-          ))}
-        </select>
-        <button
-          onClick={() => setShowFilters((f) => !f)}
-          style={{
-            padding: '9px 16px',
-            borderRadius: 8,
-            border: '1px solid #e8e8e4',
-            background: showFilters ? '#1a1a1a' : '#fff',
-            color: showFilters ? '#fff' : '#1a1a1a',
-            fontSize: 13,
-            cursor: 'pointer',
-            whiteSpace: 'nowrap',
-          }}
-        >
-          Filters {activeFilterCount > 0 ? `(${activeFilterCount})` : ''}
-        </button>
-      </div>
+      <h1 className="page-title">Jobs for {courseLabel}</h1>
+      <p className="page-sub">
+        Pulled live from MyCareersFuture. Save the ones you like, they stay on this device.
+      </p>
 
-      {/* Expanded filters */}
-      {showFilters && (
-        <div
-          style={{
-            background: '#f9f9f7',
-            borderRadius: 12,
-            padding: '1rem',
-            marginBottom: '1rem',
-            display: 'flex',
-            flexDirection: 'column',
-            gap: 12,
-          }}
-        >
-          {/* Quick toggles */}
-          <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
-            {[
-              { label: '💼 Internships only', value: internOnly, set: setInternOnly },
-              { label: '💎 Hidden gems', value: hiddenGems, set: setHiddenGems },
-              { label: '⏰ Closing soon', value: closingSoon, set: setClosingSoon },
-            ].map(({ label, value, set }) => (
+      <div className="fbar">
+        <div className="fbar-row">
+          <input
+            className="search"
+            type="search"
+            placeholder={`Search ${courseLabel} roles`}
+            aria-label="Search roles"
+            value={search}
+            onChange={(e) => {
+              setSearch(e.target.value);
+              reset();
+            }}
+          />
+          <select
+            className="sort-select"
+            aria-label="Sort by"
+            value={sortBy}
+            onChange={(e) => {
+              setSortBy(e.target.value);
+              reset();
+            }}
+          >
+            {SORT_OPTIONS.map((o) => (
+              <option key={o.value} value={o.value}>
+                {o.label}
+              </option>
+            ))}
+          </select>
+          <button
+            className={`pill-btn ${open ? 'on' : ''}`}
+            onClick={() => setOpen((o) => !o)}
+            aria-expanded={open}
+          >
+            Filters{chips.length > 0 && <span className="count">{chips.length}</span>}
+          </button>
+          <button
+            className={`pill-btn ${showSaved ? 'on' : ''}`}
+            onClick={() => setShowSaved((s) => !s)}
+            aria-pressed={showSaved}
+          >
+            Saved{savedCount > 0 && <span className="count">{savedCount}</span>}
+          </button>
+        </div>
+
+        {chips.length > 0 && (
+          <div className="chips">
+            {chips.map((c) => (
               <button
-                key={label}
+                key={c.key}
+                className="fchip"
                 onClick={() => {
-                  set((v) => !v);
-                  setPage(0);
+                  c.clear();
+                  reset();
                 }}
-                style={{
-                  padding: '6px 14px',
-                  borderRadius: 999,
-                  border: '1px solid #e8e8e4',
-                  background: value ? '#1a1a1a' : '#fff',
-                  color: value ? '#fff' : '#666',
-                  fontSize: 12,
-                  cursor: 'pointer',
-                }}
+                aria-label={`Remove filter ${c.label}`}
               >
-                {label}
+                {c.label}
+                <i>×</i>
               </button>
             ))}
+            <button className="clear-all" onClick={clearAll}>
+              Clear all
+            </button>
           </div>
+        )}
 
-          {/* Dropdowns row */}
-          <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
-            <select
-              value={companySize}
-              onChange={(e) => {
-                setCompanySize(e.target.value);
-                setPage(0);
-              }}
-              style={{
-                padding: '7px 12px',
-                borderRadius: 8,
-                border: '1px solid #e8e8e4',
-                fontSize: 13,
-                background: '#fff',
-              }}
-            >
-              {COMPANY_SIZES.map((o) => (
-                <option key={o.value} value={o.value}>
-                  {o.label}
-                </option>
-              ))}
-            </select>
-            <select
-              value={workArrangement}
-              onChange={(e) => {
-                setWorkArrangement(e.target.value);
-                setPage(0);
-              }}
-              style={{
-                padding: '7px 12px',
-                borderRadius: 8,
-                border: '1px solid #e8e8e4',
-                fontSize: 13,
-                background: '#fff',
-              }}
-            >
-              {WORK_ARRANGEMENTS.map((o) => (
-                <option key={o.value} value={o.value}>
-                  {o.label}
-                </option>
-              ))}
-            </select>
-          </div>
+        {open && (
+          <>
+            <div className="scrim" onClick={() => setOpen(false)} />
+            <div className="sheet" role="dialog" aria-label="Filters">
+              <div className="sheet-head">
+                <span>Filters</span>
+                <button onClick={() => setOpen(false)} aria-label="Close filters">
+                  ×
+                </button>
+              </div>
 
-          {/* Salary range */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-            <span style={{ fontSize: 12, color: '#888', whiteSpace: 'nowrap' }}>Salary range:</span>
-            <input
-              type="number"
-              placeholder="Min $"
-              value={salaryMin}
-              onChange={(e) => {
-                setSalaryMin(e.target.value);
-                setPage(0);
-              }}
-              style={{
-                width: 90,
-                padding: '6px 10px',
-                borderRadius: 8,
-                border: '1px solid #e8e8e4',
-                fontSize: 13,
-              }}
-            />
-            <span style={{ fontSize: 12, color: '#aaa' }}>to</span>
-            <input
-              type="number"
-              placeholder="Max $"
-              value={salaryMax}
-              onChange={(e) => {
-                setSalaryMax(e.target.value);
-                setPage(0);
-              }}
-              style={{
-                width: 90,
-                padding: '6px 10px',
-                borderRadius: 8,
-                border: '1px solid #e8e8e4',
-                fontSize: 13,
-              }}
-            />
-            {(salaryMin || salaryMax) && (
-              <button
-                onClick={() => {
-                  setSalaryMin('');
-                  setSalaryMax('');
-                }}
-                style={{
-                  fontSize: 12,
-                  color: '#aaa',
-                  background: 'none',
-                  border: 'none',
-                  cursor: 'pointer',
-                }}
-              >
-                Clear
-              </button>
-            )}
-          </div>
-
-          {/* Hidden gems explanation */}
-          {hiddenGems && (
-            <div
-              style={{
-                fontSize: 12,
-                color: '#888',
-                background: '#fff',
-                padding: '8px 12px',
-                borderRadius: 8,
-                border: '1px solid #e8e8e4',
-              }}
-            >
-              💎 Hidden gems = posted in the last 48hrs with fewer than 10 applicants. Apply fast
-              for the best chance!
-            </div>
-          )}
-        </div>
-      )}
-
-      <div style={{ fontSize: 12, color: '#aaa', marginBottom: '1rem' }}>
-        {total} roles · <strong>{COURSES[course]?.label}</strong>
-      </div>
-
-      {error && <div className="error">{error}</div>}
-      {loading && <div className="loading">Loading jobs...</div>}
-
-      {!loading && (
-        <div className="job-list">
-          {jobs.length === 0 && (
-            <div className="empty">
-              No jobs found. Try switching to "All Courses" or adjusting your filters.
-            </div>
-          )}
-          {jobs.map((job) => {
-            const daysLeft = daysUntilClose(job.closingAt);
-            const isUrgent = daysLeft !== null && daysLeft <= 7;
-            const isNew = job.postedAt && new Date() - new Date(job.postedAt) < 48 * 60 * 60 * 1000;
-            const isHidden = isNew && job.applicationCount < 10;
-
-            return (
-              <div className="job-card" key={job._id}>
-                <div className="job-top">
-                  <div style={{ flex: 1 }}>
-                    <div
-                      style={{
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: 6,
-                        flexWrap: 'wrap',
-                        marginBottom: 2,
-                      }}
-                    >
-                      <div className="job-title">{job.title}</div>
-                      {isHidden && (
-                        <span
-                          style={{
-                            fontSize: 10,
-                            padding: '2px 7px',
-                            borderRadius: 999,
-                            background: '#EEEDFE',
-                            color: '#533AB7',
-                            fontWeight: 700,
-                          }}
-                        >
-                          💎 Hidden gem
-                        </span>
-                      )}
-                      {isUrgent && (
-                        <span
-                          style={{
-                            fontSize: 10,
-                            padding: '2px 7px',
-                            borderRadius: 999,
-                            background: '#FCEBEB',
-                            color: '#A32D2D',
-                            fontWeight: 700,
-                          }}
-                        >
-                          ⏰ {daysLeft}d left
-                        </span>
-                      )}
-                      {isNew && !isHidden && (
-                        <span
-                          style={{
-                            fontSize: 10,
-                            padding: '2px 7px',
-                            borderRadius: 999,
-                            background: '#EAF3DE',
-                            color: '#3B6D11',
-                            fontWeight: 700,
-                          }}
-                        >
-                          New
-                        </span>
-                      )}
-                    </div>
-                    <div className="job-company">{job.company}</div>
-                  </div>
-                  <div style={{ textAlign: 'right', flexShrink: 0 }}>
-                    <div className="job-salary">{job.salary?.display || 'Not stated'}</div>
-                    <div style={{ fontSize: 11, color: '#aaa', marginTop: 2 }}>
-                      {timeAgo(job.postedAt)}
-                    </div>
-                  </div>
+              <div>
+                <h4>Quick picks</h4>
+                <div className="seg">
+                  <button
+                    className={internOnly ? 'on' : ''}
+                    onClick={() => {
+                      setInternOnly((v) => !v);
+                      reset();
+                    }}
+                  >
+                    Internships only
+                  </button>
+                  <button
+                    className={hiddenGems ? 'on' : ''}
+                    onClick={() => {
+                      setHiddenGems((v) => !v);
+                      reset();
+                    }}
+                  >
+                    Hidden gems
+                  </button>
+                  <button
+                    className={closingSoon ? 'on' : ''}
+                    onClick={() => {
+                      setClosingSoon((v) => !v);
+                      reset();
+                    }}
+                  >
+                    Closing soon
+                  </button>
                 </div>
+                {hiddenGems && (
+                  <p className="gem-note" style={{ marginTop: 10 }}>
+                    Hidden gem = posted in the last 48 hours with fewer than 10 applicants. Apply
+                    fast!
+                  </p>
+                )}
+              </div>
 
-                {/* Tags row */}
-                <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', marginTop: 8 }}>
-                  {job.companySize && job.companySize !== 'unknown' && (
-                    <span
-                      style={{
-                        fontSize: 11,
-                        padding: '2px 8px',
-                        borderRadius: 999,
-                        background: '#f0f0ee',
-                        color: '#666',
-                        border: '1px solid #e8e8e4',
+              <div>
+                <h4>Company type</h4>
+                <div className="seg">
+                  {COMPANY_SIZES.map((o) => (
+                    <button
+                      key={o.value}
+                      className={companySize === o.value ? 'on' : ''}
+                      onClick={() => {
+                        setCompanySize((v) => (v === o.value ? '' : o.value));
+                        reset();
                       }}
                     >
-                      {job.companySize === 'government'
-                        ? '🏛'
-                        : job.companySize === 'mnc'
-                          ? '🌐'
-                          : job.companySize === 'startup'
-                            ? '🚀'
-                            : '🏢'}{' '}
-                      {job.companySize}
-                    </span>
-                  )}
-                  {job.workArrangement && job.workArrangement !== 'onsite' && (
-                    <span
-                      style={{
-                        fontSize: 11,
-                        padding: '2px 8px',
-                        borderRadius: 999,
-                        background: '#f0f0ee',
-                        color: '#666',
-                        border: '1px solid #e8e8e4',
-                      }}
-                    >
-                      {job.workArrangement === 'remote' ? '🏠 Remote' : '🔄 Hybrid'}
-                    </span>
-                  )}
-                  {job.applicationCount > 0 && (
-                    <span
-                      style={{
-                        fontSize: 11,
-                        padding: '2px 8px',
-                        borderRadius: 999,
-                        background: '#f0f0ee',
-                        color: '#666',
-                        border: '1px solid #e8e8e4',
-                      }}
-                    >
-                      {job.applicationCount} applicants
-                    </span>
-                  )}
-                  {job.skills.slice(0, 4).map((s) => (
-                    <span className="tag" key={s}>
-                      {s}
-                    </span>
+                      {o.label}
+                    </button>
                   ))}
                 </div>
+              </div>
 
-                <div style={{ marginTop: 10 }}>
-                  <a className="apply-btn" href={job.url} target="_blank" rel="noopener noreferrer">
-                    View on MyCareersFuture →
-                  </a>
+              <div>
+                <h4>Work arrangement</h4>
+                <div className="seg">
+                  {WORK_ARRANGEMENTS.map((o) => (
+                    <button
+                      key={o.value}
+                      className={workArrangement === o.value ? 'on' : ''}
+                      onClick={() => {
+                        setWorkArrangement((v) => (v === o.value ? '' : o.value));
+                        reset();
+                      }}
+                    >
+                      {o.label}
+                    </button>
+                  ))}
                 </div>
               </div>
-            );
-          })}
+
+              <div>
+                <h4>Monthly salary</h4>
+                <div className="salary-row">
+                  <input
+                    type="number"
+                    inputMode="numeric"
+                    placeholder="Min $"
+                    aria-label="Minimum salary"
+                    value={salaryMin}
+                    onChange={(e) => {
+                      setSalaryMin(e.target.value);
+                      reset();
+                    }}
+                  />
+                  <span>to</span>
+                  <input
+                    type="number"
+                    inputMode="numeric"
+                    placeholder="Max $"
+                    aria-label="Maximum salary"
+                    value={salaryMax}
+                    onChange={(e) => {
+                      setSalaryMax(e.target.value);
+                      reset();
+                    }}
+                  />
+                </div>
+              </div>
+
+              <div className="sheet-foot">
+                <button className="clear-all" onClick={clearAll}>
+                  Clear all
+                </button>
+                <button className="btn brand" onClick={() => setOpen(false)}>
+                  Show {showSaved ? savedCount : total} roles
+                </button>
+              </div>
+            </div>
+          </>
+        )}
+      </div>
+
+      <div className="result-count">
+        {showSaved ? (
+          <>
+            <strong>{savedCount}</strong> saved {savedCount === 1 ? 'job' : 'jobs'}
+          </>
+        ) : (
+          <>
+            <strong>{total.toLocaleString()}</strong> roles for {courseLabel}
+          </>
+        )}
+      </div>
+
+      {error && !showSaved && (
+        <div className="error">
+          Could not load jobs ({error}). The free server may be waking up.
+          <button onClick={load}>Try again</button>
         </div>
       )}
 
-      {total > 15 && (
-        <div style={{ display: 'flex', justifyContent: 'center', gap: 8, marginTop: '1.5rem' }}>
+      {loading && !showSaved && (
+        <div className="job-list" aria-busy="true">
+          {[0, 1, 2, 3].map((i) => (
+            <div key={i} className="skel job-skel" />
+          ))}
+        </div>
+      )}
+
+      {(!loading || showSaved) && (
+        <div className="job-list">
+          {visible.length === 0 && !error && (
+            <div className="empty">
+              <strong>{showSaved ? 'Nothing saved yet' : 'Aiya, nothing here'}</strong>
+              {showSaved
+                ? 'Tap the bookmark on any job and it will show up here.'
+                : 'Try loosening your filters, or switch to All Courses.'}
+            </div>
+          )}
+          {visible.map((job) => (
+            <JobCard key={job._id} job={job} saved={!!saved[job._id]} onToggle={toggleSaved} />
+          ))}
+        </div>
+      )}
+
+      {!showSaved && total > PAGE_SIZE && (
+        <div className="pager">
           <button
-            onClick={() => setPage((p) => Math.max(0, p - 1))}
+            className="btn ghost"
+            onClick={() => goPage(Math.max(0, page - 1))}
             disabled={page === 0}
-            style={{
-              padding: '7px 16px',
-              borderRadius: 8,
-              border: '1px solid #e8e8e4',
-              background: '#fff',
-              fontSize: 13,
-              opacity: page === 0 ? 0.4 : 1,
-            }}
           >
             Previous
           </button>
-          <span style={{ fontSize: 13, color: '#888', padding: '7px 8px' }}>
-            Page {page + 1} of {Math.ceil(total / 15)}
+          <span>
+            Page {page + 1} of {Math.ceil(total / PAGE_SIZE)}
           </span>
           <button
-            onClick={() => setPage((p) => p + 1)}
-            disabled={(page + 1) * 15 >= total}
-            style={{
-              padding: '7px 16px',
-              borderRadius: 8,
-              border: '1px solid #e8e8e4',
-              background: '#fff',
-              fontSize: 13,
-              opacity: (page + 1) * 15 >= total ? 0.4 : 1,
-            }}
+            className="btn ghost"
+            onClick={() => goPage(page + 1)}
+            disabled={(page + 1) * PAGE_SIZE >= total}
           >
             Next
           </button>

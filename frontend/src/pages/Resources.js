@@ -113,117 +113,74 @@ const RESOURCES = [
       },
     ],
   },
+  {
+    category: 'SMU-Specific',
+    items: [
+      {
+        title: 'SMU Career Development Office (CDO)',
+        description:
+          'Official SMU career portal — internship listings exclusive to SMU students, resume review appointments, and career fairs.',
+        url: 'https://www.smu.edu.sg/campus-life/student-services/career-development',
+        tag: 'SMU',
+        tagColor: '#185FA5',
+        tagBg: '#E6F1FB',
+      },
+      {
+        title: 'SMU TARO (Internship Credit)',
+        description:
+          "Apply to have your internship recognised for academic credit under SMU's internship programme. Check eligibility requirements.",
+        url: 'https://taro.smu.edu.sg',
+        tag: 'SMU',
+        tagColor: '#185FA5',
+        tagBg: '#E6F1FB',
+      },
+    ],
+  },
 ];
 
 export default function Resources() {
   return (
     <div>
-      <p style={{ fontSize: 13, color: '#888', marginBottom: '1.5rem' }}>
-        Curated resources from the Singapore student community. Know a good resource we're missing?{' '}
-        <a href="mailto:jiaquan81516@gmail.com" style={{ color: '#185FA5' }}>
-          Submit it here.
+      <h1 className="page-title">Resources</h1>
+      <p className="page-sub">
+        Hand-picked by students, for students. Know a good one we are missing?{' '}
+        <a href="mailto:jiaquan81516@gmail.com" style={{ fontWeight: 700 }}>
+          Send it in.
         </a>
       </p>
 
       {RESOURCES.map((section) => (
-        <div key={section.category} style={{ marginBottom: '2rem' }}>
-          <h2
-            style={{
-              fontSize: 13,
-              fontWeight: 600,
-              color: '#888',
-              textTransform: 'uppercase',
-              letterSpacing: '0.5px',
-              marginBottom: '0.75rem',
-            }}
-          >
-            {section.category}
-          </h2>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+        <section className="res-section" key={section.category}>
+          <h2>{section.category}</h2>
+          <div className="res-list">
             {section.items.map((item) => (
               <a
+                className="res"
                 key={item.title}
                 href={item.url}
                 target="_blank"
                 rel="noopener noreferrer"
-                style={{ textDecoration: 'none', color: 'inherit' }}
               >
-                <div
-                  style={{
-                    background: '#fff',
-                    border: '1px solid #e8e8e4',
-                    borderRadius: 12,
-                    padding: '1rem 1.25rem',
-                    transition: 'border-color 0.15s',
-                    cursor: 'pointer',
-                  }}
-                  onMouseEnter={(e) => (e.currentTarget.style.borderColor = '#bbb')}
-                  onMouseLeave={(e) => (e.currentTarget.style.borderColor = '#e8e8e4')}
-                >
-                  <div
-                    style={{
-                      display: 'flex',
-                      justifyContent: 'space-between',
-                      alignItems: 'flex-start',
-                      gap: 8,
-                      marginBottom: 6,
-                    }}
+                <div className="res-top">
+                  <span className="res-title">{item.title}</span>
+                  <span
+                    className="res-tag"
+                    style={{ background: item.tagBg, color: item.tagColor }}
                   >
-                    <div
-                      style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}
-                    >
-                      <span style={{ fontSize: 14, fontWeight: 600 }}>{item.title}</span>
-                      <span
-                        style={{
-                          fontSize: 11,
-                          padding: '2px 8px',
-                          borderRadius: 999,
-                          background: item.tagBg,
-                          color: item.tagColor,
-                          fontWeight: 600,
-                        }}
-                      >
-                        {item.tag}
-                      </span>
-                    </div>
-                    <span
-                      style={{ fontSize: 12, color: '#185FA5', whiteSpace: 'nowrap', marginTop: 2 }}
-                    >
-                      Open →
-                    </span>
-                  </div>
-
-                  <p
-                    style={{
-                      fontSize: 13,
-                      color: '#555',
-                      lineHeight: 1.5,
-                      marginBottom: item.credit ? 8 : 0,
-                    }}
-                  >
-                    {item.description}
-                  </p>
-
-                  {item.credit && (
-                    <div
-                      style={{
-                        fontSize: 11,
-                        color: '#aaa',
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: 4,
-                      }}
-                    >
-                      <span>Credit:</span>
-                      <span style={{ fontWeight: 600, color: '#888' }}>u/{item.credit}</span>
-                      <span>on {item.creditPlatform}</span>
-                    </div>
-                  )}
+                    {item.tag}
+                  </span>
                 </div>
+                <p className="res-desc">{item.description}</p>
+                {item.credit && (
+                  <div className="res-credit">
+                    Credit: <b>u/{item.credit}</b> on {item.creditPlatform}
+                  </div>
+                )}
+                <span className="res-open">Open</span>
               </a>
             ))}
           </div>
-        </div>
+        </section>
       ))}
     </div>
   );

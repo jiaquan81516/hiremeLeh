@@ -1,34 +1,97 @@
+/*
+  HiremeLeh! design tokens
+  Palette: Ink #10141F, Paper #F2F3F6, Flag Red #D90F29, Line Blue #005EC4,
+           Gold #F5B700, Go Green #0A8F4E  (dark mode swaps ink/paper/surface)
+  Type: Archivo (display + UI, signage feel) / Figtree (body)
+*/
+:root {
+  --ink: #10141f;
+  --ink-2: #4a5163;
+  --ink-3: #7b8398;
+  --paper: #f2f3f6;
+  --surface: #ffffff;
+  --line: #e1e4eb;
+  --brand: #d90f29;
+  --red: #d90f29;
+  --gold: #f5b700;
+  --green: #0a8f4e;
+  --track: #10141f;
+  --radius: 14px;
+  --font-display: 'Archivo', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --font-body: 'Figtree', system-ui, -apple-system, 'Segoe UI', sans-serif;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --ink: #f1f3f8;
+    --ink-2: #b4bbcc;
+    --ink-3: #7c859b;
+    --paper: #0d1017;
+    --surface: #171b26;
+    --line: #272d3c;
+    --red: #ff4d62;
+    --green: #2fc47f;
+  }
+}
+
 * {
   box-sizing: border-box;
   margin: 0;
   padding: 0;
 }
 
+html {
+  -webkit-text-size-adjust: 100%;
+}
+
 body {
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-  background: #f5f5f3;
-  color: #1a1a1a;
+  font-family: var(--font-body);
+  background: var(--paper);
+  color: var(--ink);
   font-size: 15px;
-  line-height: 1.6;
+  line-height: 1.55;
+  -webkit-font-smoothing: antialiased;
 }
 
 button {
   cursor: pointer;
   font-family: inherit;
+  color: inherit;
 }
 input,
 select,
 textarea {
   font-family: inherit;
+  color: inherit;
+}
+a {
+  color: inherit;
+}
+
+:focus-visible {
+  outline: 3px solid var(--track);
+  outline-offset: 2px;
+  border-radius: 6px;
 }
 
 ::-webkit-scrollbar {
-  width: 6px;
+  width: 8px;
 }
 ::-webkit-scrollbar-track {
   background: transparent;
 }
 ::-webkit-scrollbar-thumb {
-  background: #ccc;
-  border-radius: 3px;
+  background: var(--line);
+  border-radius: 4px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
+  }
 }

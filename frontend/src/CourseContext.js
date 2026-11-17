@@ -7,7 +7,7 @@ export function CourseProvider({ children }) {
     try {
       return localStorage.getItem('hiremeLeh_course') || 'scis';
     } catch {
-      return 'is';
+      return 'scis';
     }
   });
 
